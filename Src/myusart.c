@@ -1,6 +1,7 @@
 #include "myusart.h"
 #include "myserial_log.h"
 #include "myserial_hmi.h"
+#include "myserial_plc.h"
 
 
 uint8_t cUartLog, cUartPlc, cUartHmi, cUartRuff1, cUartRuff2;
@@ -72,7 +73,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     }
     else if(uartHandle->Instance==USART2)
     {
-
+        Serial_Plc_MspInit();
         /* USER CODE END USART2_MspInit 1 */
     }
     else if(uartHandle->Instance==USART3)
@@ -97,7 +98,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
     }
     else if(uartHandle->Instance==USART2)
     {
-
+        Serial_Plc_MspDeInit();
     }
     else if(uartHandle->Instance==USART3)
     {
@@ -157,8 +158,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
     // uart plc
     else if(UartHandle->Instance==USART2)
     {
-        //UART_Plc_Handle_Byte(cUartPlc);
-        //UART_Plc_receive();
+        UART_Plc_Handle_Byte(cUartPlc);
+        UART_Plc_receive();
     }
     // uart hmi
     else if(UartHandle->Instance==USART3)
@@ -197,7 +198,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
     // uart hmi
     else if(UartHandle->Instance==USART3)
     {
-        printf("uart3 error\n");
+        //printf("uart3 error\n");
     }    // uart_ruff1
     else if(UartHandle->Instance==UART4)
     {

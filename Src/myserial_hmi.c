@@ -3,11 +3,14 @@
 
 #include "myserial_hmi.h"
 #include "myled.h"
+#include "cmsis_os.h"
 
+#include "mymessage.h"
 
 UART_HandleTypeDef uartHmi;
 extern uint8_t cUartHmi;
 
+uint8_t signalHmiRx = False;
 
 osThreadId hmiTaskHandle;
 
@@ -18,9 +21,16 @@ extern const uint32_t STOPWIDTH[];
 
 extern const uint32_t PARITY[];
 
+extern osMessageQId plcQueueHiPrio;
+extern osPoolId  plcPoolHiPrio;
+
 static uint8_t stateHmi;
 
+static uint8_t HMI_RX_BUFFER[HMI_RX_BUFFER_LEN];
+static uint8_t indexHmiRxBuffer;
+static uint8_t lenHmiRxBuffer;
 
+osMessageQId hmiQueue;
 
 
 void Serial_Hmi_Init()
@@ -36,7 +46,7 @@ void Serial_Hmi_Init()
 
 
     uartHmi.Instance = USART3;
-    uartHmi.Init.BaudRate = 9600;//BAUDRATE[pSysInfo->baudrate];
+    uartHmi.Init.BaudRate = BAUDRATE[pSysInfo->baudrate];
     uartHmi.Init.WordLength = WORDWIDTH[pSysInfo->wordlength];
     uartHmi.Init.StopBits = STOPWIDTH[pSysInfo->stopbits];
     uartHmi.Init.Parity = PARITY[pSysInfo->parity];
@@ -117,18 +127,46 @@ void  UART_Hmi_receive()
 }
 void StartHmiTask(void const * argument)
 {
-    uint8_t ch = 0x02;
+    uint8_t i;
+    NetMessage_t*mptr;
+ 
+  
 
     stateHmi = STATE_HMI_UNLOCK;
+    indexHmiRxBuffer = 0;
 
     UART_Hmi_receive();
 
     for(;;)
     {
+         if(signalHmiRx == True)
+        {
+            printf("\nHmi RX:%d:\n", lenHmiRxBuffer);
+
+            //mptr = (NetMessage_t*)osPoolAlloc(plcPoolHiPrio);         // Allocate memory for the message
+            
+            //mptr->type = TYPE_MESSAGE_HMI_2_PLC;
+            //mptr->length = lenHmiRxBuffer;
+
+            for(i=0; i< lenHmiRxBuffer; i++){
+                printf("%02x ", HMI_RX_BUFFER[i]);
+                //mptr->data[i] = HMI_RX_BUFFER[i];
+            }
+            printf("\n");
+
+            // send out the received cmd to PLC
+
+            //if(osMessagePut(plcQueueHiPrio, (uint32_t)mptr, osWaitForever) != osOK)  {
+            //    printf("Hmi 2 Plc message queue fail\n");
+
+            //}
+            
+            signalHmiRx = False;
+        }
         //printf("Hello\n");
         LED2_Toggle();
         //HAL_UART_Transmit(&uartHmi, (uint8_t *)&ch, 1, 0xFFFF);
-        osDelay(200);
+        osDelay(20);
     }
 
     /* USER CODE END StartDefaultTask */
@@ -138,13 +176,44 @@ void UART_Hmi_Handle_Byte(uint8_t c)
 {
     switch(stateHmi)
     {
+        case STATE_HMI_UNLOCK:
+            if(c == HEAD_HMI)
+            {
+                stateHmi = STATE_HMI_BODY;
+                HMI_RX_BUFFER[indexHmiRxBuffer++] = c;
+                
+            }
+            break;
+        case STATE_HMI_BODY:
+            if(c == END_HMI){
+                stateHmi = STATE_HMI_CRCH;
+            }
+            HMI_RX_BUFFER[indexHmiRxBuffer++] = c;
+            break;
+        case STATE_HMI_CRCH:
+            stateHmi = STATE_HMI_CRCL;
+            HMI_RX_BUFFER[indexHmiRxBuffer++] = c;
+            break;
+        case STATE_HMI_CRCL:
+            HMI_RX_BUFFER[indexHmiRxBuffer++] = c;
+            stateHmi = STATE_HMI_UNLOCK;
+            lenHmiRxBuffer = indexHmiRxBuffer;
+            signalHmiRx = True;
+            indexHmiRxBuffer = 0;
+            break;
+
         default:
+
             break;
 
     }
 }
 void Hmi_Task_Init()
 {
+
+    osMessageQDef(hmiqueue, 1, NetMessage_t);
+    hmiQueue= osMessageCreate(osMessageQ(hmiqueue), NULL);
+    
     osThreadDef(hmiTask, StartHmiTask, osPriorityHigh, 0, 128);
     hmiTaskHandle = osThreadCreate(osThread(hmiTask), NULL);
     printf("Hmi task started\n");

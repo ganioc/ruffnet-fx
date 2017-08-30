@@ -39,6 +39,8 @@
 /* USER CODE BEGIN 0 */
 extern UART_HandleTypeDef uartLog;
 extern UART_HandleTypeDef uartHmi;
+extern UART_HandleTypeDef uartPlc;
+
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -192,7 +194,7 @@ void USART2_IRQHandler(void)
   /* USER CODE BEGIN USART1_IRQn 0 */
 
   /* USER CODE END USART1_IRQn 0 */
-
+  HAL_UART_IRQHandler(&uartPlc);
   /* USER CODE BEGIN USART1_IRQn 1 */
 
   /* USER CODE END USART1_IRQn 1 */

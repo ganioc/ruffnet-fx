@@ -23,15 +23,16 @@ static uint8_t stateHmi;
 
 
 
-void Serial_Hmi_Init(){
+void Serial_Hmi_Init()
+{
 
-   SysInfo_t * pSysInfo =  getSysInfoP();
+    SysInfo_t * pSysInfo =  getSysInfoP();
 
 
 
-   printf("Serial Hmi init\n");
-   printf("buadrate:%d , index:%d\n" , BAUDRATE[pSysInfo->baudrate], pSysInfo->baudrate);
-    
+    printf("Serial Hmi init\n");
+    printf("buadrate:%d , index:%d\n", BAUDRATE[pSysInfo->baudrate], pSysInfo->baudrate);
+
 
 
     uartHmi.Instance = USART3;
@@ -42,7 +43,7 @@ void Serial_Hmi_Init(){
     uartHmi.Init.Mode = UART_MODE_TX_RX;
     uartHmi.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     uartHmi.Init.OverSampling = UART_OVERSAMPLING_16;
-    
+
     if(HAL_UART_Init(&uartHmi) != HAL_OK)
     {
         _Error_Handler(__FILE__, __LINE__);
@@ -104,7 +105,6 @@ void Serial_Hmi_MspDeInit()
 // uart log
 void  UART_Hmi_receive()
 {
-
     uint8_t ret;
 
     do
@@ -119,8 +119,8 @@ void StartHmiTask(void const * argument)
 {
     uint8_t ch = 0x02;
 
-       stateHmi = STATE_HMI_UNLOCK;
-    
+    stateHmi = STATE_HMI_UNLOCK;
+
     UART_Hmi_receive();
 
     for(;;)
@@ -136,8 +136,30 @@ void StartHmiTask(void const * argument)
 
 void UART_Hmi_Handle_Byte(uint8_t c)
 {
-    switch(stateHmi){
+    switch(stateHmi)
+    {
+        case STATE_HMI_UNLOCK:
+            if(c == HEAD_HMI)
+            {
+                state = STATE_HMI_HEAD;
+            }
+            break;
+        case STATE_HMI_HEAD:
+
+            break;
+        case STATE_HMI_BODY:
+
+            break;
+            case STATE_HMI_END:
+                break;
+                case STATE_HMI_CRCH:
+                    break;
+                    case STATE_HMI_CRCL:
+
+                        break;
+
         default:
+            
             break;
 
     }

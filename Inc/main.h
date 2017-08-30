@@ -52,6 +52,8 @@
 
 /* USER CODE BEGIN Includes */
 
+
+
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
@@ -64,6 +66,15 @@
 #ifndef True
  #define True 1
 #endif
+
+//#define MESSAGE_LENGTH 128
+
+//typedef struct message{
+//    uint8_t    type;   /* message type */
+//    uint8_t    length;   /* message length */
+//    uint8_t data[MESSAGE_LENGTH];   /* data       */
+//} message_t;
+
 /* USER CODE END Private defines */
 
 void _Error_Handler(char *, int);
