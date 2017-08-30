@@ -38,6 +38,7 @@
 
 /* USER CODE BEGIN 0 */
 extern UART_HandleTypeDef uartLog;
+extern UART_HandleTypeDef uartHmi;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -186,6 +187,27 @@ void USART1_IRQHandler(void)
   /* USER CODE END USART1_IRQn 1 */
 }
 
+void USART2_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART1_IRQn 0 */
+
+  /* USER CODE END USART1_IRQn 0 */
+
+  /* USER CODE BEGIN USART1_IRQn 1 */
+
+  /* USER CODE END USART1_IRQn 1 */
+}
+
+void USART3_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART1_IRQn 0 */
+
+  /* USER CODE END USART1_IRQn 0 */
+  HAL_UART_IRQHandler(&uartHmi);
+  /* USER CODE BEGIN USART1_IRQn 1 */
+
+  /* USER CODE END USART1_IRQn 1 */
+}
 void EXTI4_IRQHandler(void)
 {
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);

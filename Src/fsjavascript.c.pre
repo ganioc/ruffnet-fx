@@ -1,0 +1,31 @@
+#include "fsjavascript.h"
+#include "fs.h"
+
+
+struct fs_file *fs_open_ajax(const char *name)
+{
+    struct fs_file *file;
+
+    file = fs_malloc();
+    if(file == NULL)
+    {
+        return NULL;
+    }
+
+    if(!strcmp(name, "/system")
+    {
+    printf("Found the file\n");
+        file->data = NULL;
+        file->len = 1;
+        return file;
+    }
+    else
+    {
+        fs_free(file);
+    }
+}
+
+
+
+
+

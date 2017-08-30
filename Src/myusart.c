@@ -1,5 +1,7 @@
 #include "myusart.h"
 #include "myserial_log.h"
+#include "myserial_hmi.h"
+
 
 uint8_t cUartLog, cUartPlc, cUartHmi, cUartRuff1, cUartRuff2;
 
@@ -18,15 +20,16 @@ const uint32_t BAUDRATE[]=
     115200
 
 };
- const uint32_t WORDWIDTH[] =
+const uint32_t WORDWIDTH[] =
 {
     UART_WORDLENGTH_8B,
     UART_WORDLENGTH_9B
 };
- const char *strWORDWIDTH[] = {
+const char *strWORDWIDTH[] =
+{
     "7 BIT",
-        "8 BIT"
- };
+    "8 BIT"
+};
 const uint32_t PARITY[] =
 {
     UART_PARITY_NONE,
@@ -36,7 +39,7 @@ const uint32_t PARITY[] =
 const char *strPARITY[] =
 {
     "PARITY_NONE",
-   "PARITY_EVEN",
+    "PARITY_EVEN",
     "PARITY_ODD"
 };
 const uint32_t STOPWIDTH[] =
@@ -53,7 +56,7 @@ const char* strSTOPWIDTH[] =
 void My_Usart_Init()
 {
 
-    Serial_Log_Init();
+
 
 
 }
@@ -74,6 +77,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     }
     else if(uartHandle->Instance==USART3)
     {
+        Serial_Hmi_MspInit();
 
     }
     else  if(uartHandle->Instance==UART4)
@@ -97,7 +101,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
     }
     else if(uartHandle->Instance==USART3)
     {
-
+        Serial_Hmi_MspDeInit();
     }
     else if(uartHandle->Instance==UART4)
     {
@@ -142,6 +146,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
+    
 
     // uart log
     if(UartHandle->Instance==USART1)
@@ -158,8 +163,9 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
     // uart hmi
     else if(UartHandle->Instance==USART3)
     {
-        //UART_Hmi_Handle_Byte(cUartHmi);
-        //UART_Hmi_receive();
+        UART_Hmi_Handle_Byte(cUartHmi);
+        UART_Hmi_receive();
+        
     }
     // uart_ruff1
     else if(UartHandle->Instance==UART4)
@@ -191,7 +197,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
     // uart hmi
     else if(UartHandle->Instance==USART3)
     {
-
+        printf("uart3 error\n");
     }    // uart_ruff1
     else if(UartHandle->Instance==UART4)
     {

@@ -50,6 +50,8 @@
 #define DEFAULT_GW4  1
 
 
+
+
 /**
 there are 32 sections
 1 section has 8 pages
@@ -96,14 +98,26 @@ typedef struct IpInfo{
 
 }IpInfo_t;
 
+typedef struct PlcInfo{
+    uint8_t plcName[16]; //
+    uint8_t plcNameLen;
+    uint8_t version;    
+    uint8_t baudrate;
+    uint8_t wordlength;
+    uint8_t parity;
+    uint8_t stopbits;
+}PlcInfo_t;
+
 #define MBRINFO_SIZE                  sizeof(MBRInfo_t)
 #define SYSINFO_SIZE                  sizeof(SysInfo_t)
 #define IPINFO_SIZE                     sizeof(IpInfo_t)
+#define PLCINFO_SIZE                   sizeof(PlcInfo_t)
 
 
 void I2C1_Init(void);
 void E2PROM_Init(void);
 void E2PROM_Reset_Default(void);
-
+SysInfo_t * getSysInfoP();
+IpInfo_t * getIpInfoP();
 
 #endif

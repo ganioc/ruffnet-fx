@@ -4,38 +4,57 @@
 uint8_t cUartLog, cUartPlc, cUartHmi, cUartRuff1, cUartRuff2;
 
 
-static const uint32_t BAUDRATE[]={
-        300,
-        600,
-        1200,
-        2400,
-        4800,
-        9600,
-        19200,
-        38400,
-        57600,
-        115200
+const uint32_t BAUDRATE[]=
+{
+    300,
+    600,
+    1200,
+    2400,
+    4800,
+    9600,
+    19200,
+    38400,
+    57600,
+    115200
 
 };
-static const uint32_t WORDWIDTH[] = {
+ const uint32_t WORDWIDTH[] =
+{
     UART_WORDLENGTH_8B,
     UART_WORDLENGTH_9B
 };
-static const uint32_t PARITY[] = {
+ const char *strWORDWIDTH[] = {
+    "7 BIT",
+        "8 BIT"
+ };
+const uint32_t PARITY[] =
+{
     UART_PARITY_NONE,
-        UART_PARITY_EVEN,
-        UART_PARITY_ODD
+    UART_PARITY_EVEN,
+    UART_PARITY_ODD
 };
-static const uint32_t STOPWIDTH[] = {
-UART_STOPBITS_1,
+const char *strPARITY[] =
+{
+    "PARITY_NONE",
+   "PARITY_EVEN",
+    "PARITY_ODD"
+};
+const uint32_t STOPWIDTH[] =
+{
+    UART_STOPBITS_1,
     UART_STOPBITS_2
 };
-
+const char* strSTOPWIDTH[] =
+{
+    "STOPBITS_1",
+    "STOPBITS_2"
+};
 
 void My_Usart_Init()
 {
 
-    Serial_Log_Init();
+    Serial_Log_Init();//uart1
+    Serial_Hmi_Init();//uart3
 
 
 }
@@ -56,6 +75,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     }
     else if(uartHandle->Instance==USART3)
     {
+        Serial_Hmi_MspInit();
 
     }
     else  if(uartHandle->Instance==UART4)
@@ -75,11 +95,11 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
     }
     else if(uartHandle->Instance==USART2)
     {
-
+        
     }
     else if(uartHandle->Instance==USART3)
     {
-
+        Serial_Hmi_MspDeInit();
     }
     else if(uartHandle->Instance==UART4)
     {
@@ -142,6 +162,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
     {
         //UART_Hmi_Handle_Byte(cUartHmi);
         //UART_Hmi_receive();
+        uint8_t ret;
+
+    do
+    {
+        ret = HAL_UART_Receive_IT(&uartHmi, (uint8_t *)&cUartHmi, 1);
+
+    }
+    while(ret != HAL_OK);
     }
     // uart_ruff1
     else if(UartHandle->Instance==UART4)
@@ -173,7 +201,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
     // uart hmi
     else if(UartHandle->Instance==USART3)
     {
-
+        printf("uart3 error\n");
     }    // uart_ruff1
     else if(UartHandle->Instance==UART4)
     {
@@ -187,7 +215,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
 }
 
 //void Config_Usart(UART_HandleTypeDef *huart, uint32_t BaudRate, uint32_t WordLength, uint32_t StopBits, uint32_t Parity){
-    
+
 
 
 

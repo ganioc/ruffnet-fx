@@ -10,11 +10,15 @@ I2C_HandleTypeDef hi2c1;
 uint8_t   mbrInfo[MBRINFO_SIZE];
 uint8_t    sysInfo[SYSINFO_SIZE];
 uint8_t    ipInfo[IPINFO_SIZE];
+//uint8_t    plcInfo[PLCINFO_SIZE];
 
 extern const uint32_t BAUDRATE[];
 extern const char* strWORDWIDTH[];
 extern const char * strPARITY[];
 extern const char* strSTOPWIDTH[];
+
+
+
 
 void I2C1_Init(void)
 {
@@ -166,14 +170,26 @@ void Print_IpInfo(IpInfo_t *p){
     printf("--------------------------------\n");    
 }
 
+SysInfo_t * getSysInfoP(){
+    SysInfo_t * pSysInfo;
+        pSysInfo = (SysInfo_t *) & sysInfo;
+    return pSysInfo;
+}
+IpInfo_t * getIpInfoP(){
+    IpInfo_t * pIpInfo;
+        pIpInfo = (IpInfo_t *)&ipInfo;
+        return pIpInfo;
+}
 void E2PROM_Reset_Default(void){
     MBRInfo_t *pMBRInfo;
     SysInfo_t * pSysInfo;
     IpInfo_t * pIpInfo;
+   // PlcInfo_t* pPlcInfo;
 
     pMBRInfo = (MBRInfo_t *)&mbrInfo;
     pSysInfo = (SysInfo_t *) & sysInfo;
     pIpInfo = (IpInfo_t *)&ipInfo;
+    //pPlcInfo = (PlcInfo_t *)&plcInfo;
 
     pMBRInfo->mark1= (uint8_t)DEFAULT_MARK1;
     pMBRInfo->mark2= (uint8_t)DEFAULT_MARK2;
@@ -206,6 +222,10 @@ void E2PROM_Reset_Default(void){
     pIpInfo->gwip[1]= DEFAULT_GW2;
     pIpInfo->gwip[2]= DEFAULT_GW3;
     pIpInfo->gwip[3]= DEFAULT_GW4;
+
+//    sprintf((char*)pPlcInfo->plcName, "%s", "PLC name" );
+//    pPlcInfo->plcNameLen = strlen(pPlcInfo->plcName);
+//    pPlcInfo->baudrate= 
 
 
     printf("Set E2prom values to default\n");

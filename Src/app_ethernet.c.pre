@@ -35,6 +35,7 @@
 
 #include "myled.h"
 #include "lwip.h"
+#include "mye2prom.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -45,7 +46,9 @@
 __IO uint8_t DHCP_state;
 #endif
 
+// This is the final real ip address
 uint8_t IP_ADDRESS[4];
+extern uint8_t    ipInfo[];
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -99,6 +102,8 @@ void ethernetif_notify_conn_changed(struct netif *netif)
     struct ip_addr netmask;
     struct ip_addr gw;
 
+    IpInfo_t *p = ipInfo;
+
     if(netif_is_link_up(netif))
     {
 #ifdef USE_DHCP
@@ -111,14 +116,18 @@ void ethernetif_notify_conn_changed(struct netif *netif)
         /* Update DHCP state machine */
         DHCP_state = DHCP_START;
 #else
-        IP4_ADDR(&ipaddr, IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
-        IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
-        IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
-
+        //IP4_ADDR(&ipaddr, IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
+        //IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
+        //IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+        
+        IP4_ADDR(&ipaddr, p->ip[0], p->ip[1], p->ip[2], p->ip[3]);
+        IP4_ADDR(&netmask, p->netmask[0], p->netmask[1], p->netmask[2], 
+        p->netmask[3]);
+        IP4_ADDR(&gw, p->gwip[0], p->gwip[1], p->gwip[2], p->netmask[3]);
 #ifdef USE_LCD
         uint8_t iptxt[20];
 
-        sprintf((char*)iptxt, "%d.%d.%d.%d", IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
+        sprintf((char*)iptxt, "%d.%d.%d.%d", p->ip[0],  p->ip[1], p->ip[2], p->ip[3]);
         printf("The network cable is now connected \n");
         printf("Static IP address: %s\n", iptxt);
 
@@ -163,6 +172,7 @@ void dhcp_do(struct netif *netif)
     struct ip_addr netmask;
     struct ip_addr gw;
     uint32_t IPaddress;
+    IpInfo_t *p = ipInfo;
 
     switch(DHCP_state)
     {
@@ -209,6 +219,12 @@ void dhcp_do(struct netif *netif)
                 IP_ADDRESS[2] = iptab[1];
                 IP_ADDRESS[3] = iptab[0];
 
+                p->ip[0] =  iptab[3];
+                p->ip[1] =  iptab[2];
+                p->ip[2] =  iptab[1];
+                p->ip[3] =  iptab[0];
+                
+
                 LED3_On();
 #endif
             }
@@ -223,22 +239,30 @@ void dhcp_do(struct netif *netif)
                     dhcp_stop(netif);
 
                     /* Static address used */
-                    IP4_ADDR(&ipaddr, IP_ADDR0,IP_ADDR1, IP_ADDR2, IP_ADDR3);
-                    IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
-                    IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+                    // Add by Yang
+                    // We should use 
+                    //IP4_ADDR(&ipaddr, IP_ADDR0,IP_ADDR1, IP_ADDR2, IP_ADDR3);
+                    //IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
+                    //IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+
+                            IP4_ADDR(&ipaddr, p->ip[0], p->ip[1], p->ip[2], p->ip[3]);
+        IP4_ADDR(&netmask, p->netmask[0], p->netmask[1], p->netmask[2], 
+        p->netmask[3]);
+        IP4_ADDR(&gw, p->gwip[0], p->gwip[1], p->gwip[2], p->netmask[3]);
+                    
                     netif_set_addr(netif, &ipaddr, &netmask, &gw);
 
 #ifdef USE_LCD
                     uint8_t iptxt[20];
 
-                    sprintf((char*)iptxt, "%d.%d.%d.%d", IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
+                    sprintf((char*)iptxt, "%d.%d.%d.%d", p->ip[0], p->ip[1],  p->ip[2], p->ip[3]);
                     printf("DHCP timeout !!\n");
                     printf("Static IP address  : %s\n", iptxt);
 
-                                    IP_ADDRESS[0] =IP_ADDR0;
-                IP_ADDRESS[1] =IP_ADDR1;
-                IP_ADDRESS[2] = IP_ADDR2;
-                IP_ADDRESS[3] = IP_ADDR3;
+                    IP_ADDRESS[0] =p->ip[0];
+                    IP_ADDRESS[1] =p->ip[1];
+                    IP_ADDRESS[2] = p->ip[2];
+                    IP_ADDRESS[3] = p->ip[3];
 
                     LED4_On();
 #endif

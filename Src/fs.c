@@ -74,7 +74,7 @@ void fs_close_custom(struct fs_file *file);
 #endif /* LWIP_HTTPD_CUSTOM_FILES */
 
 /*-----------------------------------------------------------------------------------*/
-static struct fs_file *
+struct fs_file *
 fs_malloc(void)
 {
   int i;
@@ -88,7 +88,7 @@ fs_malloc(void)
 }
 
 /*-----------------------------------------------------------------------------------*/
-static void
+void
 fs_free(struct fs_file *file)
 {
   int i;

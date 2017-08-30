@@ -116,12 +116,14 @@ void StartDefaultTask(void const * argument)
   /* USER CODE BEGIN StartDefaultTask */
   
    MX_LWIP_Init();
+  osDelay(3000);
   
   /* Infinite loop */
   for(;;)
   {
-        LED1_Toggle();
-    osDelay(1000);
+        //LED1_Toggle();
+        LED3_Toggle();
+        osDelay(100);
   }
   /* USER CODE END StartDefaultTask */
 }

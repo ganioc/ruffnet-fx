@@ -111,7 +111,7 @@ void StartLogTask(void const * argument)
     for(;;)
     {
         //printf("Hello\n");
-        LED2_Toggle();
+        //LED2_Toggle();
 
         if(signalLogRx == True)
         {
@@ -123,7 +123,7 @@ void StartLogTask(void const * argument)
             signalLogRx = False;
         }
 
-        osDelay(100);
+        osDelay(10);
     }
 
     /* USER CODE END StartDefaultTask */
@@ -133,6 +133,7 @@ void Log_Task_Init()
 {
     osThreadDef(logTask, StartLogTask, osPriorityNormal, 0, 128);
     logTaskHandle = osThreadCreate(osThread(logTask), NULL);
+    printf("Log task started\n");
 }
 
 void UART_Log_Handle_Byte(uint8_t c)

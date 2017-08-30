@@ -93,6 +93,8 @@ struct fs_file *fs_open(const char *name);
 void fs_close(struct fs_file *file);
 int fs_read(struct fs_file *file, char *buffer, int count);
 int fs_bytes_left(struct fs_file *file);
+struct fs_file *fs_malloc(void);
+void fs_free(struct fs_file *file);
 
 #if LWIP_HTTPD_FILE_STATE
 /** This user-defined function is called when a file is opened. */
