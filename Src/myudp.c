@@ -11,8 +11,11 @@
 
 #include "cmsis_os.h"
 
+extern osMailQId  plcMailLoPrio;
 
-osMailQId  udpMail;
+struct udp_pcb *upcb;
+
+//osMailQId  udpMail;
 
 
 void udp_server_receive_callback(void *arg, struct udp_pcb *upcb, struct pbuf *p, ip_addr_t *addr, u16_t port);
@@ -45,6 +48,8 @@ void udp_server_init(void){
       }
    }
 
+   
+
 }
 
 
@@ -64,6 +69,8 @@ void udp_server_receive_callback( void *arg, struct udp_pcb *upcb, struct pbuf *
 
   /* Connect to the remote client */
   udp_connect(upcb, addr, port);
+
+  //Send data to plc
     
   /* Tell the client that we have accepted it */
   udp_send(upcb, p);

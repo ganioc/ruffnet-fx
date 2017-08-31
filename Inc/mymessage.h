@@ -10,6 +10,14 @@
 #define TYPE_MESSAGE_LOG_2_PLC  5
 #define TYPE_MESSAGE_PLC_2_LOG  6
 
+#define NULL_ID 0
+#define HMI_ID  1
+#define PLC_ID   2
+#define UDP_ID  3
+#define LOG_ID  4
+#define HTTP_ID 5
+
+/*
 typedef struct NetMessage{
     uint8_t type;
     uint8_t length;
@@ -17,12 +25,15 @@ typedef struct NetMessage{
     uint32_t block;
 
 } NetMessage_t;
+*/
 
 typedef struct NetMail{
-    uint8_t type;
+    uint8_t clientId;
+    uint8_t serverId;
     uint8_t length;
     uint8_t  data[NET_MESSAGE_LEN];
-    //uint32_t block;
 
 } NetMail_t;
+
+
 #endif

@@ -131,9 +131,9 @@ void  UART_Hmi_receive()
 void StartHmiTask(void const * argument)
 {
     uint8_t i;
-    NetMessage_t*mptr;
+    //NetMessage_t*mptr;
     NetMail_t * pMail;
-        osEvent  evt;
+    osEvent  evt;
     osStatus status;
 
     stateHmi = STATE_HMI_UNLOCK;
@@ -147,13 +147,15 @@ void StartHmiTask(void const * argument)
     {
         evt = osMailGet(hmiMail, 0);
 
-        if(evt.status == osEventMail ){
+        if(evt.status == osEventMail)
+        {
             pMail = (NetMail_t*)evt.value.p;
             printf("\nHmi receive from plc:\n");
-            printf("type: %d\n", pMail->type);
+            //printf("type: %d\n", pMail->type);
             printf("len: %d\n", pMail->length);
 
-            for(i=0; i< pMail->length; i++){
+            for(i=0; i< pMail->length; i++)
+            {
                 printf("%02x ", pMail->data[i]);
 
             }
@@ -162,11 +164,12 @@ void StartHmiTask(void const * argument)
             HAL_UART_Transmit(&uartHmi, pMail->data, pMail->length, 100);
 
             printf("--> Send out to Real-hmi\n");
-            
+
             osMailFree(hmiMail, pMail);
 
         }
-        
+
+        // received from Real-Hmi
         if(signalHmiRx == True)
         {
             printf("\n<-- Hmi RX from Real-Hmi:%d:\n", lenHmiRxBuffer);
@@ -175,8 +178,11 @@ void StartHmiTask(void const * argument)
 
             if(pMail != NULL)
             {
-                pMail->type = TYPE_MESSAGE_HMI_2_PLC;
+                //pMail->type = TYPE_MESSAGE_HMI_2_PLC;
+                pMail->clientId = HMI_ID;
+                pMail->serverId = PLC_ID;
                 pMail->length = lenHmiRxBuffer;
+                
                 for(i=0; i< lenHmiRxBuffer; i++)
                 {
                     printf("%02x ", HMI_RX_BUFFER[i]);
@@ -242,23 +248,14 @@ void Hmi_Task_Init()
     osMailQDef(hmimail, 2, NetMail_t);
     hmiMail= osMailCreate(osMailQ(hmimail), NULL);
 
-    if(hmiMail!= NULL){
+    if(hmiMail!= NULL)
+    {
         printf("hmi mail hi created\n");
     }
-    
-    //osMessageQDef(hmiqueue, 1, NetMessage_t);
-    //hmiQueue= osMessageCreate(osMessageQ(hmiqueue), NULL);
-
-
-    //if(hmiQueue != NULL)
-    //{
-    //    printf("hmiQueue created\n");
-    //}
-
 
     osThreadDef(hmiTask, StartHmiTask, osPriorityHigh, 0, 128);
     hmiTaskHandle = osThreadCreate(osThread(hmiTask), NULL);
-    //printf("Hmi task started\n");
+
 }
 
 
