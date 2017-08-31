@@ -42,14 +42,14 @@ void tcp_server_init(void){
  /* create new tcp pcb */
   tcp_server_pcb = tcp_new();
 
- printf("tcp server init()\n");
+ printf("tcp server init(), port:%d\n", TCP_SERVER_PORT);
 
   if (tcp_server_pcb != NULL)
   {
     err_t err;
     
     /* bind echo_pcb to port 7 (ECHO protocol) */
-    err = tcp_bind(tcp_server_pcb, IP_ADDR_ANY, SERVER_PORT);
+    err = tcp_bind(tcp_server_pcb, IP_ADDR_ANY, TCP_SERVER_PORT);
     
     if (err == ERR_OK)
     {

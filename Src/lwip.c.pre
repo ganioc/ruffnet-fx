@@ -54,6 +54,12 @@
 
 /* USER CODE BEGIN 0 */
 #include "app_ethernet.h"
+#include "myhttpd.h"
+#include "mytcp.h"
+
+#include "mye2prom.h"
+
+extern uint8_t    ipInfo[];
 
 /* USER CODE END 0 */
 
@@ -102,22 +108,25 @@ void MX_LWIP_Init(void)
     Netif_Config();
 
 
+
+    // add tcp server here
+    tcp_server_init();
+
     // add http server here
+    http_server_netconn_init();
 
 
-  /* Notify user about the netwoek interface config */
-  User_notification(&gnetif);
-    
+    /* Notify user about the netwoek interface config */
+    User_notification(&gnetif);
+
     /* USER CODE BEGIN 3 */
-    #ifdef USE_DHCP
-  /* Start DHCPClient */
+#ifdef USE_DHCP
+    /* Start DHCPClient */
+    osThreadDef(DHCP, DHCP_thread, osPriorityBelowNormal, 0, configMINIMAL_STACK_SIZE * 2);
 
-  osThreadDef(DHCP, DHCP_thread, osPriorityBelowNormal, 0, configMINIMAL_STACK_SIZE * 2);
-
-
-  osThreadCreate (osThread(DHCP), &gnetif);
+    osThreadCreate(osThread(DHCP), &gnetif);
 #endif
-    
+
 
     /* USER CODE END 3 */
 }
@@ -134,11 +143,20 @@ static void Netif_Config(void)
     struct ip_addr netmask;
     struct ip_addr gw;
 
+        IpInfo_t *p = (IpInfo_t *)ipInfo;
+
+    // get static ip address from e2prom
     /* IP address setting */
-    IP4_ADDR(&ipaddr, IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
-    IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2,
-             NETMASK_ADDR3);
-    IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+    //p->ip[0], p->ip[1], p->ip[2], p->ip[3]
+    
+    //IP4_ADDR(&ipaddr, IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
+    //IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2,NETMASK_ADDR3);
+    //IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+
+        IP4_ADDR(&ipaddr, p->ip[0], p->ip[1], p->ip[2], p->ip[3]);
+    IP4_ADDR(&netmask, p->netmask[0], p->netmask[1], p->netmask[2],
+                             p->netmask[3]);
+    IP4_ADDR(&gw, p->gwip[0], p->gwip[1], p->gwip[2], p->gwip[3]);
 
     /* create a binary semaphore used for informing ethernetif of frame
     reception */

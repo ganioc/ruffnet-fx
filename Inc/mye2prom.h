@@ -119,5 +119,6 @@ void E2PROM_Init(void);
 void E2PROM_Reset_Default(void);
 SysInfo_t * getSysInfoP();
 IpInfo_t * getIpInfoP();
+void Reset_Ip(void);
 
 #endif

@@ -132,7 +132,8 @@
 #define LWIP_NETIF_LINK_CALLBACK        1
 
 
-#define USE_DHCP       /* enable DHCP, if disabled static address is used*/
+//#define USE_DHCP       /* enable DHCP, if disabled static address is used*/
+
 /* USER CODE END 1 */
 #define USE_LCD 
 // printf log

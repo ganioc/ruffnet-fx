@@ -57,6 +57,10 @@
 #include "myhttpd.h"
 #include "mytcp.h"
 
+#include "mye2prom.h"
+
+extern uint8_t    ipInfo[];
+
 /* USER CODE END 0 */
 
 /* ETH Variables initialization ----------------------------------------------*/
@@ -99,11 +103,16 @@ void MX_LWIP_Init(void)
     tcpip_init(NULL, NULL);
     printf("tcpip_init()\n");
 
+    //udp_init();
+    //printf("udp_init()\n");
+
     printf("netif_config()\n");
     /* Initilaize the LwIP stack */
     Netif_Config();
 
 
+    // udp_server_init();
+    udp_server_init();
 
     // add tcp server here
     tcp_server_init();
@@ -139,11 +148,19 @@ static void Netif_Config(void)
     struct ip_addr netmask;
     struct ip_addr gw;
 
+    IpInfo_t *p = (IpInfo_t *)ipInfo;
+
     // get static ip address from e2prom
     /* IP address setting */
-    IP4_ADDR(&ipaddr, IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
-    IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2,NETMASK_ADDR3);
-    IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+    //p->ip[0], p->ip[1], p->ip[2], p->ip[3]
+
+    //IP4_ADDR(&ipaddr, IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
+    //IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2,NETMASK_ADDR3);
+    //IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+
+    IP4_ADDR(&ipaddr, p->ip[0], p->ip[1], p->ip[2], p->ip[3]);
+    IP4_ADDR(&netmask, p->netmask[0], p->netmask[1], p->netmask[2],p->netmask[3]);
+    IP4_ADDR(&gw, p->gwip[0], p->gwip[1], p->gwip[2], p->gwip[3]);
 
     /* create a binary semaphore used for informing ethernetif of frame
     reception */

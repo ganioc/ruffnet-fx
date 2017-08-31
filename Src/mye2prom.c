@@ -180,6 +180,25 @@ IpInfo_t * getIpInfoP(){
         pIpInfo = (IpInfo_t *)&ipInfo;
         return pIpInfo;
 }
+void Reset_Ip(void){
+    IpInfo_t * pIpInfo;
+    pIpInfo = (IpInfo_t *)&ipInfo;
+
+    pIpInfo->ip[0]= DEFAULT_IP1;
+    pIpInfo->ip[1]= DEFAULT_IP2;
+    pIpInfo->ip[2]= DEFAULT_IP3;
+    pIpInfo->ip[3]= DEFAULT_IP4;
+
+    pIpInfo->netmask[0]= DEFAULT_NETMASK1;
+    pIpInfo->netmask[1]= DEFAULT_NETMASK2;
+    pIpInfo->netmask[2]= DEFAULT_NETMASK3;
+    pIpInfo->netmask[3]= DEFAULT_NETMASK4;
+
+    pIpInfo->gwip[0]= DEFAULT_GW1;
+    pIpInfo->gwip[1]= DEFAULT_GW2;
+    pIpInfo->gwip[2]= DEFAULT_GW3;
+    pIpInfo->gwip[3]= DEFAULT_GW4;    
+}
 void E2PROM_Reset_Default(void){
     MBRInfo_t *pMBRInfo;
     SysInfo_t * pSysInfo;

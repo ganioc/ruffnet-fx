@@ -47,7 +47,7 @@ __IO uint8_t DHCP_state;
 #endif
 
 // This is the final real ip address
-uint8_t IP_ADDRESS[4];
+//uint8_t IP_ADDRESS[4];
 extern uint8_t    ipInfo[];
 
 /* Private function prototypes -----------------------------------------------*/
@@ -59,6 +59,8 @@ extern uint8_t    ipInfo[];
   */
 void User_notification(struct netif *netif)
 {
+        IpInfo_t *p = (IpInfo_t *)ipInfo;
+        
     if(netif_is_up(netif))
     {
 #ifdef USE_DHCP
@@ -68,9 +70,9 @@ void User_notification(struct netif *netif)
 
         uint8_t iptxt[20];
 
-        sprintf((char*)iptxt, "%d.%d.%d.%d", IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
+        sprintf((char*)iptxt, "%d.%d.%d.%d", p->ip[0], p->ip[1],  p->ip[2], p->ip[3]);
 
-        printf("Static IP address: %s\n", iptxt);
+        printf("User notifi no dhcp, Static IP address: %s\n", iptxt);
 
         /* Turn On LED 3 to indicate ETH and LwIP init success*/
         LED3_On();
@@ -102,7 +104,10 @@ void ethernetif_notify_conn_changed(struct netif *netif)
     struct ip_addr netmask;
     struct ip_addr gw;
 
-    IpInfo_t *p = (IpInfo_t *)ipInfo;
+    IpInfo_t *p;
+
+    p = (IpInfo_t *)ipInfo;
+
 
     if(netif_is_link_up(netif))
     {
@@ -121,15 +126,14 @@ void ethernetif_notify_conn_changed(struct netif *netif)
         //IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
 
         IP4_ADDR(&ipaddr, p->ip[0], p->ip[1], p->ip[2], p->ip[3]);
-        IP4_ADDR(&netmask, p->netmask[0], p->netmask[1], p->netmask[2],
-                 p->netmask[3]);
-        IP4_ADDR(&gw, p->gwip[0], p->gwip[1], p->gwip[2], p->netmask[3]);
+        IP4_ADDR(&netmask, p->netmask[0], p->netmask[1], p->netmask[2],p->netmask[3]);
+        IP4_ADDR(&gw, p->gwip[0], p->gwip[1], p->gwip[2], p->gwip[3]);
 #ifdef USE_LCD
         uint8_t iptxt[20];
 
         sprintf((char*)iptxt, "%d.%d.%d.%d", p->ip[0],  p->ip[1], p->ip[2], p->ip[3]);
         printf("The network cable is now connected \n");
-        printf("Static IP address: %s\n", iptxt);
+        printf("No dhcp Static IP address: %s\n", iptxt);
 
         LED4_Off();
         LED3_On();
@@ -214,10 +218,10 @@ void dhcp_do(struct netif *netif)
                 sprintf((char*)iptxt, "%d.%d.%d.%d", iptab[3], iptab[2], iptab[1], iptab[0]);
 
                 printf("IP address assigned by a DHCP server: %s\n", iptxt);
-                IP_ADDRESS[0] = iptab[3];
-                IP_ADDRESS[1] = iptab[2];
-                IP_ADDRESS[2] = iptab[1];
-                IP_ADDRESS[3] = iptab[0];
+                //IP_ADDRESS[0] = iptab[3];
+                //IP_ADDRESS[1] = iptab[2];
+                //IP_ADDRESS[2] = iptab[1];
+                //IP_ADDRESS[3] = iptab[0];
 
                 p->ip[0] =  iptab[3];
                 p->ip[1] =  iptab[2];
@@ -231,9 +235,21 @@ void dhcp_do(struct netif *netif)
             else
             {
                 /* DHCP timeout */
+
+
                 if(netif->dhcp->tries > MAX_DHCP_TRIES)
                 {
                     DHCP_state = DHCP_TIMEOUT;
+
+                    printf("DHCP timeout !!\n");
+
+                    Reset_Ip();
+
+                    uint8_t iptxt[20];
+
+                    sprintf((char*)iptxt, "%d.%d.%d.%d", p->ip[0], p->ip[1],  p->ip[2], p->ip[3]);
+
+                    printf("Static IP address  : %s\n", iptxt);
 
                     /* Stop DHCP */
                     dhcp_stop(netif);
@@ -246,23 +262,21 @@ void dhcp_do(struct netif *netif)
                     //IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
 
                     IP4_ADDR(&ipaddr, p->ip[0], p->ip[1], p->ip[2], p->ip[3]);
-                    IP4_ADDR(&netmask, p->netmask[0], p->netmask[1], p->netmask[2],
-                             p->netmask[3]);
-                    IP4_ADDR(&gw, p->gwip[0], p->gwip[1], p->gwip[2], p->netmask[3]);
+                    IP4_ADDR(&netmask, p->netmask[0], p->netmask[1], p->netmask[2],p->netmask[3]);
+                    IP4_ADDR(&gw, p->gwip[0], p->gwip[1], p->gwip[2], p->gwip[3]);
 
                     netif_set_addr(netif, &ipaddr, &netmask, &gw);
+                    /* When the netif is fully configured this function must be called.*/
+                    netif_set_up(netif);
+
 
 #ifdef USE_LCD
-                    uint8_t iptxt[20];
 
-                    sprintf((char*)iptxt, "%d.%d.%d.%d", p->ip[0], p->ip[1],  p->ip[2], p->ip[3]);
-                    printf("DHCP timeout !!\n");
-                    printf("Static IP address  : %s\n", iptxt);
 
-                    IP_ADDRESS[0] =p->ip[0];
-                    IP_ADDRESS[1] =p->ip[1];
-                    IP_ADDRESS[2] = p->ip[2];
-                    IP_ADDRESS[3] = p->ip[3];
+                    //IP_ADDRESS[0] =p->ip[0];
+                    //IP_ADDRESS[1] =p->ip[1];
+                    //IP_ADDRESS[2] = p->ip[2];
+                    //IP_ADDRESS[3] = p->ip[3];
 
                     LED4_On();
 #endif

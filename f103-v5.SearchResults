@@ -1,21 +1,944 @@
----- osFeature_messageq Matches (5 in 3 files) ----
-Cmsis_os.c (middlewares\third_party\freertos\source\cmsis_rtos):927
-#if (defined (osFeature_MessageQ)  &&  (osFeature_MessageQ != 0)) /* Use Message Queues */
+---- ip_addr_t Matches (212 in 52 files) ----
+Api.h (middlewares\third_party\lwip\src\include\lwip):221
+err_t   netconn_getaddr(struct netconn *conn, ip_addr_t *addr,
+                        u16_t *port, u8_t local);
+#define netconn_peer(c,i,p) netconn_getaddr(c,i,p,0)
+Api.h (middlewares\third_party\lwip\src\include\lwip):226
+err_t   netconn_bind(struct netconn *conn, ip_addr_t *addr, u16_t port);
+err_t   netconn_connect(struct netconn *conn, ip_addr_t *addr, u16_t port);
+err_t   netconn_disconnect (struct netconn *conn);
+err_t   netconn_listen_with_backlog(struct netconn *conn, u8_t backlog);
+Api.h (middlewares\third_party\lwip\src\include\lwip):236
+                       ip_addr_t *addr, u16_t port);
+err_t   netconn_send(struct netconn *conn, struct netbuf *buf);
+err_t   netconn_write_partly(struct netconn *conn, const void *dataptr, size_t size,
+Api.h (middlewares\third_party\lwip\src\include\lwip):246
+err_t   netconn_join_leave_group(struct netconn *conn, ip_addr_t *multiaddr,
+                                 ip_addr_t *netif_addr, enum netconn_igmp join_or_leave);
+#endif /* LWIP_IGMP */
+#if LWIP_DNS
+err_t   netconn_gethostbyname(const char *name, ip_addr_t *addr);
+#endif /* LWIP_DNS */
+
+Api_lib.c (middlewares\third_party\lwip\src\api):135
+netconn_getaddr(struct netconn *conn, ip_addr_t *addr, u16_t *port, u8_t local)
+{
+  struct api_msg msg;
+Api_lib.c (middlewares\third_party\lwip\src\api):166
+netconn_bind(struct netconn *conn, ip_addr_t *addr, u16_t port)
+{
+  struct api_msg msg;
+Api_lib.c (middlewares\third_party\lwip\src\api):192
+netconn_connect(struct netconn *conn, ip_addr_t *addr, u16_t port)
+{
+  struct api_msg msg;
+Api_lib.c (middlewares\third_party\lwip\src\api):549
+netconn_sendto(struct netconn *conn, struct netbuf *buf, ip_addr_t *addr, u16_t port)
+{
+  if (buf != NULL) {
+Api_lib.c (middlewares\third_party\lwip\src\api):720
+                         ip_addr_t *multiaddr,
+                         ip_addr_t *netif_addr,
+                         enum netconn_igmp join_or_leave)
+{
+Api_lib.c (middlewares\third_party\lwip\src\api):746
+ * @param addr a preallocated ip_addr_t where to store the resolved IP address
+ * @return ERR_OK: resolving succeeded
+ *         ERR_MEM: memory error, try again later
+Api_lib.c (middlewares\third_party\lwip\src\api):753
+netconn_gethostbyname(const char *name, ip_addr_t *addr)
+{
+  struct dns_api_msg msg;
+Api_msg.c (middlewares\third_party\lwip\src\api):79
+    ip_addr_t *addr)
+{
+  struct pbuf *q;
+Api_msg.c (middlewares\third_party\lwip\src\api):145
+   ip_addr_t *addr, u16_t port)
+{
+  struct netbuf *buf;
+Api_msg.c (middlewares\third_party\lwip\src\api):1526
+do_dns_found(const char *name, ip_addr_t *ipaddr, void *arg)
+{
+  struct dns_api_msg *msg = (struct dns_api_msg*)arg;
+Api_msg.h (middlewares\third_party\lwip\src\include\lwip):78
+      ip_addr_t *ipaddr;
+      u16_t port;
+    } bc;
+Api_msg.h (middlewares\third_party\lwip\src\include\lwip):83
+      ip_addr_t *ipaddr;
+      u16_t *port;
+      u8_t local;
+Api_msg.h (middlewares\third_party\lwip\src\include\lwip):107
+      ip_addr_t *multiaddr;
+      ip_addr_t *netif_addr;
+      enum netconn_igmp join_or_leave;
+    } jl;
+Api_msg.h (middlewares\third_party\lwip\src\include\lwip):139
+  ip_addr_t *addr;
+  /** This semaphore is posted when the name is resolved, the application thread
+      should wait on it. */
+Autoip.c (middlewares\third_party\lwip\src\core\ipv4):111
+static void autoip_create_addr(struct netif *netif, ip_addr_t *ipaddr);
+
+/* sends an ARP probe */
+Autoip.c (middlewares\third_party\lwip\src\core\ipv4):196
+autoip_create_addr(struct netif *netif, ip_addr_t *ipaddr)
+{
+  /* Here we create an IP-Address out of range 169.254.1.0 to 169.254.254.255
+Autoip.c (middlewares\third_party\lwip\src\core\ipv4):258
+  ip_addr_t sn_mask, gw_addr;
+
+  LWIP_DEBUGF(AUTOIP_DEBUG | LWIP_DBG_TRACE,
+Autoip.c (middlewares\third_party\lwip\src\core\ipv4):487
+    ip_addr_t sipaddr, dipaddr;
+    struct eth_addr netifaddr;
+    ETHADDR16_COPY(netifaddr.addr, netif->hwaddr);
+Autoip.h (middlewares\third_party\lwip\src\include\ipv4\lwip):83
+  ip_addr_t llipaddr;       /* the currently selected, probed, announced or used LL IP-Address */
+  u8_t state;               /* current AutoIP state machine state */
+  u8_t sent_num;            /* sent number of probes or announces, dependent on state */
+Dhcp.c (middlewares\third_party\lwip\src\core):160
+static void dhcp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t *addr, u16_t port);
+
+/* set the DHCP timers */
+Dhcp.c (middlewares\third_party\lwip\src\core):572
+    ip_addr_t dns_addr;
+    ip4_addr_set_u32(&dns_addr, htonl(dhcp_get_option_value(dhcp, DHCP_OPTION_IDX_DNS_SERVER + n)));
+    dns_setserver(n, &dns_addr);
+Dhcp.c (middlewares\third_party\lwip\src\core):803
+void dhcp_arp_reply(struct netif *netif, ip_addr_t *addr)
+{
+  LWIP_ERROR("netif != NULL", (netif != NULL), return;);
+Dhcp.c (middlewares\third_party\lwip\src\core):931
+  ip_addr_t sn_mask, gw_addr;
+  LWIP_ERROR("dhcp_bind: netif != NULL", (netif != NULL), return;);
+  dhcp = netif->dhcp;
+Dhcp.c (middlewares\third_party\lwip\src\core):1537
+dhcp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t *addr, u16_t port)
+{
+  struct netif *netif = (struct netif *)arg;
+Dhcp.h (middlewares\third_party\lwip\src\include\lwip):52
+  ip_addr_t server_ip_addr; /* dhcp server address that offered this lease */
+  ip_addr_t offered_ip_addr;
+  ip_addr_t offered_sn_mask;
+  ip_addr_t offered_gw_addr;
+ 
+  u32_t offered_t0_lease; /* lease period (in seconds) */
+Dhcp.h (middlewares\third_party\lwip\src\include\lwip):63
+  ip_addr_t offered_si_addr;
+  char boot_file_name[DHCP_FILE_LEN];
+#endif /* LWIP_DHCP_BOOTPFILE */
+Dhcp.h (middlewares\third_party\lwip\src\include\lwip):127
+void dhcp_arp_reply(struct netif *netif, ip_addr_t *addr);
+#endif
+
+Dns.c (middlewares\third_party\lwip\src\core):177
+  ip_addr_t ipaddr;
+  /* pointer to callback on DNS query done */
+  dns_found_callback found;
+Dns.c (middlewares\third_party\lwip\src\core):211
+static void dns_recv(void *s, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t *addr, u16_t port);
+static void dns_check_entries(void);
+
+Dns.c (middlewares\third_party\lwip\src\core):222
+static ip_addr_t              dns_servers[DNS_MAX_SERVERS];
+/** Contiguous buffer for processing responses */
+static u8_t                   dns_payload_buffer[LWIP_MEM_ALIGN_BUFFER(DNS_MSG_SIZE)];
+Dns.c (middlewares\third_party\lwip\src\core):234
+  ip_addr_t dnsserver;
+
+  dns_payload = (u8_t *)LWIP_MEM_ALIGN(dns_payload_buffer);
+Dns.c (middlewares\third_party\lwip\src\core):273
+dns_setserver(u8_t numdns, ip_addr_t *dnsserver)
+{
+  if ((numdns < DNS_MAX_SERVERS) && (dns_pcb != NULL) &&
+Dns.c (middlewares\third_party\lwip\src\core):288
+ip_addr_t
+dns_getserver(u8_t numdns)
+{
+Dns.c (middlewares\third_party\lwip\src\core):379
+dns_local_removehost(const char *hostname, const ip_addr_t *addr)
+{
+  int removed = 0;
+Dns.c (middlewares\third_party\lwip\src\core):414
+dns_local_addhost(const char *hostname, const ip_addr_t *addr)
+{
+  struct local_hostlist_entry *entry;
+Dns.c (middlewares\third_party\lwip\src\core):445
+ * @return the hostname's IP address, as u32_t (instead of ip_addr_t to
+ *         better check for failure: != IPADDR_NONE) or IPADDR_NONE if the hostname
+ *         was not found in the cached dns_table.
+Dns.c (middlewares\third_party\lwip\src\core):733
+dns_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t *addr, u16_t port)
+{
+  u16_t i;
+Dns.c (middlewares\third_party\lwip\src\core):804
+             (ans.len == PP_HTONS(sizeof(ip_addr_t))) ) {
+            /* read the answer resource record's TTL, and maximize it if needed */
+            pEntry->ttl = ntohl(ans.ttl);
+Dns.c (middlewares\third_party\lwip\src\core):811
+            SMEMCPY(&(pEntry->ipaddr), (pHostname+SIZEOF_DNS_ANSWER), sizeof(ip_addr_t));
+            LWIP_DEBUGF(DNS_DEBUG, ("dns_recv: \"%s\": response = ", pEntry->name));
+            ip_addr_debug_print(DNS_DEBUG, (&(pEntry->ipaddr)));
+Dns.c (middlewares\third_party\lwip\src\core):928
+ * @param addr pointer to a ip_addr_t where to store the address if it is already
+ *             cached in the dns_table (only valid if ERR_OK is returned!)
+ * @param found a callback function to be called on success, failure or timeout (only if
+Dns.c (middlewares\third_party\lwip\src\core):936
+dns_gethostbyname(const char *hostname, ip_addr_t *addr, dns_found_callback found,
+                  void *callback_arg)
+{
+Dns.h (middlewares\third_party\lwip\src\include\lwip):86
+  ip_addr_t addr;
+  struct local_hostlist_entry *next;
+};
+Dns.h (middlewares\third_party\lwip\src\include\lwip):100
+ * @param ipaddr pointer to an ip_addr_t containing the IP address of the hostname,
+ *        or NULL if the name could not be found (or on any other error).
+ * @param callback_arg a user-specified callback argument passed to dns_gethostbyname
+Dns.h (middlewares\third_party\lwip\src\include\lwip):104
+typedef void (*dns_found_callback)(const char *name, ip_addr_t *ipaddr, void *callback_arg);
+
+void           dns_init(void);
+Dns.h (middlewares\third_party\lwip\src\include\lwip):108
+void           dns_setserver(u8_t numdns, ip_addr_t *dnsserver);
+ip_addr_t      dns_getserver(u8_t numdns);
+err_t          dns_gethostbyname(const char *hostname, ip_addr_t *addr,
+                                 dns_found_callback found, void *callback_arg);
+
+Dns.h (middlewares\third_party\lwip\src\include\lwip):114
+int            dns_local_removehost(const char *hostname, const ip_addr_t *addr);
+err_t          dns_local_addhost(const char *hostname, const ip_addr_t *addr);
+#endif /* DNS_LOCAL_HOSTLIST && DNS_LOCAL_HOSTLIST_IS_DYNAMIC */
+
+Etharp.c (middlewares\third_party\lwip\src\netif):113
+  ip_addr_t ipaddr;
+  struct netif *netif;
+  struct eth_addr ethaddr;
+Etharp.c (middlewares\third_party\lwip\src\netif):266
+etharp_find_entry(ip_addr_t *ipaddr, u8_t flags)
+{
+  s8_t old_pending = ARP_TABLE_SIZE, old_stable = ARP_TABLE_SIZE;
+Etharp.c (middlewares\third_party\lwip\src\netif):448
+etharp_update_arp_entry(struct netif *netif, ip_addr_t *ipaddr, struct eth_addr *ethaddr, u8_t flags)
+{
+  s8_t i;
+Etharp.c (middlewares\third_party\lwip\src\netif):526
+etharp_add_static_entry(ip_addr_t *ipaddr, struct eth_addr *ethaddr)
+{
+  struct netif *netif;
+Etharp.c (middlewares\third_party\lwip\src\netif):551
+etharp_remove_static_entry(ip_addr_t *ipaddr)
+{
+  s8_t i;
+Etharp.c (middlewares\third_party\lwip\src\netif):603
+etharp_find_addr(struct netif *netif, ip_addr_t *ipaddr,
+         struct eth_addr **eth_ret, ip_addr_t **ip_ret)
+{
+  s8_t i;
+Etharp.c (middlewares\third_party\lwip\src\netif):643
+  ip_addr_t iphdr_src;
+  LWIP_ERROR("netif != NULL", (netif != NULL), return;);
+
+Etharp.c (middlewares\third_party\lwip\src\netif):693
+  ip_addr_t sipaddr, dipaddr;
+  u8_t for_us;
+#if LWIP_AUTOIP
+Etharp.c (middlewares\third_party\lwip\src\netif):724
+      (hdr->protolen != sizeof(ip_addr_t)) ||
+      (hdr->proto != PP_HTONS(ETHTYPE_IP)))  {
+    LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_LEVEL_WARNING,
+Etharp.c (middlewares\third_party\lwip\src\netif):879
+etharp_output(struct netif *netif, struct pbuf *q, ip_addr_t *ipaddr)
+{
+  struct eth_addr *dest;
+Etharp.c (middlewares\third_party\lwip\src\netif):883
+  ip_addr_t *dst_addr = ipaddr;
+
+  LWIP_ASSERT("netif != NULL", netif != NULL);
+Etharp.c (middlewares\third_party\lwip\src\netif):1016
+etharp_query(struct netif *netif, ip_addr_t *ipaddr, struct pbuf *q)
+{
+  struct eth_addr * srcaddr = (struct eth_addr *)netif->hwaddr;
+Etharp.c (middlewares\third_party\lwip\src\netif):1177
+           const struct eth_addr *hwsrc_addr, const ip_addr_t *ipsrc_addr,
+           const struct eth_addr *hwdst_addr, const ip_addr_t *ipdst_addr,
+           const u16_t opcode)
+{
+Etharp.c (middlewares\third_party\lwip\src\netif):1235
+  hdr->protolen = sizeof(ip_addr_t);
+
+  ethhdr->type = PP_HTONS(ETHTYPE_ARP);
+Etharp.c (middlewares\third_party\lwip\src\netif):1259
+etharp_request(struct netif *netif, ip_addr_t *ipaddr)
+{
+  LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE, ("etharp_request: sending ARP request.\n"));
+Etharp.h (middlewares\third_party\lwip\src\include\netif):183
+s8_t etharp_find_addr(struct netif *netif, ip_addr_t *ipaddr,
+         struct eth_addr **eth_ret, ip_addr_t **ip_ret);
+err_t etharp_output(struct netif *netif, struct pbuf *q, ip_addr_t *ipaddr);
+err_t etharp_query(struct netif *netif, ip_addr_t *ipaddr, struct pbuf *q);
+err_t etharp_request(struct netif *netif, ip_addr_t *ipaddr);
+/** For Ethernet network interfaces, we might want to send "gratuitous ARP";
+ *  this is an ARP packet sent by a node in order to spontaneously cause other
+Etharp.h (middlewares\third_party\lwip\src\include\netif):196
+err_t etharp_add_static_entry(ip_addr_t *ipaddr, struct eth_addr *ethaddr);
+err_t etharp_remove_static_entry(ip_addr_t *ipaddr);
+#endif /* ETHARP_SUPPORT_STATIC_ENTRIES */
+
+Etharp.h (middlewares\third_party\lwip\src\include\netif):203
+                 const struct eth_addr *hwsrc_addr, const ip_addr_t *ipsrc_addr,
+                 const struct eth_addr *hwdst_addr, const ip_addr_t *ipdst_addr,
+                 const u16_t opcode);
+#endif /* LWIP_AUTOIP */
+Ethernetif.c (src):702
+static err_t low_level_output_arp_off(struct netif *netif, struct pbuf *q, ip_addr_t *ipaddr)
+{
+    err_t errval;
+Icmp.c (middlewares\third_party\lwip\src\core\ipv4):307
+  ip_addr_t iphdr_src;
+
+  /* ICMP header + IP header + 8 bytes of data */
+Igmp.c (middlewares\third_party\lwip\src\core\ipv4):138
+static struct igmp_group *igmp_lookup_group(struct netif *ifp, ip_addr_t *addr);
+static err_t  igmp_remove_group(struct igmp_group *group);
+static void   igmp_timeout( struct igmp_group *group);
+Igmp.c (middlewares\third_party\lwip\src\core\ipv4):143
+static err_t  igmp_ip_output_if(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest, struct netif *netif);
+static void   igmp_send(struct igmp_group *group, u8_t type);
+
+Igmp.c (middlewares\third_party\lwip\src\core\ipv4):148
+static ip_addr_t     allsystems;
+static ip_addr_t     allrouters;
+
+
+Igmp.c (middlewares\third_party\lwip\src\core\ipv4):290
+igmp_lookfor_group(struct netif *ifp, ip_addr_t *addr)
+{
+  struct igmp_group *group = igmp_group_list;
+Igmp.c (middlewares\third_party\lwip\src\core\ipv4):316
+igmp_lookup_group(struct netif *ifp, ip_addr_t *addr)
+{
+  struct igmp_group *group = igmp_group_list;
+Igmp.c (middlewares\third_party\lwip\src\core\ipv4):389
+igmp_input(struct pbuf *p, struct netif *inp, ip_addr_t *dest)
+{
+  struct ip_hdr *    iphdr;
+Igmp.c (middlewares\third_party\lwip\src\core\ipv4):463
+           ip_addr_t groupaddr;
+           LWIP_DEBUGF(IGMP_DEBUG, (" using \"ALL SYSTEMS\" address (224.0.0.1) [igmp_maxresp=%i]\n", (int)(igmp->igmp_maxresp)));
+           /* we first need to re-look for the group since we used dest last time */
+Igmp.c (middlewares\third_party\lwip\src\core\ipv4):515
+igmp_joingroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr)
+{
+  err_t              err = ERR_VAL; /* no matching interface */
+Igmp.c (middlewares\third_party\lwip\src\core\ipv4):585
+igmp_leavegroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr)
+{
+  err_t              err = ERR_VAL; /* no matching interface */
+Igmp.c (middlewares\third_party\lwip\src\core\ipv4):745
+igmp_ip_output_if(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest, struct netif *netif)
+{
+  /* This is the "router alert" option */
+Igmp.c (middlewares\third_party\lwip\src\core\ipv4):766
+  ip_addr_t   src  = *IP_ADDR_ANY;
+  ip_addr_t*  dest = NULL;
+
+  /* IP header + "router alert" option + IGMP header */
+Igmp.h (middlewares\third_party\lwip\src\include\ipv4\lwip):78
+  ip_addr_t          group_address;
+  /** signifies we were the last person to report */
+  u8_t               last_reporter_flag;
+Igmp.h (middlewares\third_party\lwip\src\include\ipv4\lwip):94
+struct igmp_group *igmp_lookfor_group(struct netif *ifp, ip_addr_t *addr);
+void   igmp_input(struct pbuf *p, struct netif *inp, ip_addr_t *dest);
+err_t  igmp_joingroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr);
+err_t  igmp_leavegroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr);
+void   igmp_tmr(void);
+
+Inet.h (middlewares\third_party\lwip\src\include\ipv4\lwip):94
+/* ATTENTION: the next define only works because both s_addr and ip_addr_t are an u32_t effectively! */
+#define inet_addr_to_ipaddr_p(target_ipaddr_p, source_inaddr)   ((target_ipaddr_p) = (ip_addr_t*)&((source_inaddr)->s_addr))
+
+/* directly map this to the lwip internal functions */
+Inet.h (middlewares\third_party\lwip\src\include\ipv4\lwip):99
+#define inet_aton(cp, addr)   ipaddr_aton(cp, (ip_addr_t*)addr)
+#define inet_ntoa(addr)       ipaddr_ntoa((ip_addr_t*)&(addr))
+#define inet_ntoa_r(addr, buf, buflen) ipaddr_ntoa_r((ip_addr_t*)&(addr), buf, buflen)
+
+#ifdef __cplusplus
+Inet_chksum.c (middlewares\third_party\lwip\src\core\ipv4):273
+       ip_addr_t *src, ip_addr_t *dest,
+       u8_t proto, u16_t proto_len)
+{
+Inet_chksum.c (middlewares\third_party\lwip\src\core\ipv4):333
+       ip_addr_t *src, ip_addr_t *dest,
+       u8_t proto, u16_t proto_len, u16_t chksum_len)
+{
+Inet_chksum.h (middlewares\third_party\lwip\src\include\ipv4\lwip):76
+       ip_addr_t *src, ip_addr_t *dest,
+       u8_t proto, u16_t proto_len);
+u16_t inet_chksum_pseudo_partial(struct pbuf *p,
+       ip_addr_t *src, ip_addr_t *dest,
+       u8_t proto, u16_t proto_len, u16_t chksum_len);
+#if LWIP_CHKSUM_COPY_ALGORITHM
+Ip.c (middlewares\third_party\lwip\src\core\ipv4):107
+ip_addr_t current_iphdr_src;
+/** Destination IP address of current_header */
+ip_addr_t current_iphdr_dest;
+
+/** The IP header ID of the next outgoing IP packet */
+Ip.c (middlewares\third_party\lwip\src\core\ipv4):124
+ip_route(ip_addr_t *dest)
+{
+  struct netif *netif;
+Ip.c (middlewares\third_party\lwip\src\core\ipv4):383
+  /* copy IP addresses to aligned ip_addr_t */
+  ip_addr_copy(current_iphdr_dest, iphdr->dest);
+  ip_addr_copy(current_iphdr_src, iphdr->src);
+Ip.c (middlewares\third_party\lwip\src\core\ipv4):641
+ip_output_if(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
+             u8_t ttl, u8_t tos,
+             u8_t proto, struct netif *netif)
+Ip.c (middlewares\third_party\lwip\src\core\ipv4):655
+err_t ip_output_if_opt(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
+       u8_t ttl, u8_t tos, u8_t proto, struct netif *netif, void *ip_options,
+       u16_t optlen)
+Ip.c (middlewares\third_party\lwip\src\core\ipv4):661
+  ip_addr_t dest_addr;
+#if CHECKSUM_GEN_IP_INLINE
+  u32_t chk_sum = 0;
+Ip.c (middlewares\third_party\lwip\src\core\ipv4):818
+ip_output(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
+          u8_t ttl, u8_t tos, u8_t proto)
+{
+Ip.c (middlewares\third_party\lwip\src\core\ipv4):857
+ip_output_hinted(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
+          u8_t ttl, u8_t tos, u8_t proto, u8_t *addr_hint)
+{
+Ip.h (middlewares\third_party\lwip\src\include\ipv4\lwip):78
+  ip_addr_t local_ip; \
+  ip_addr_t remote_ip; \
+   /* Socket options */  \
+  u8_t so_options;      \
+Ip.h (middlewares\third_party\lwip\src\include\ipv4\lwip):170
+extern ip_addr_t current_iphdr_src;
+/** Destination IP address of current_header */
+extern ip_addr_t current_iphdr_dest;
+
+#define ip_init() /* Compatibility define, not init needed. */
+struct netif *ip_route(ip_addr_t *dest);
+err_t ip_input(struct pbuf *p, struct netif *inp);
+err_t ip_output(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
+       u8_t ttl, u8_t tos, u8_t proto);
+err_t ip_output_if(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
+       u8_t ttl, u8_t tos, u8_t proto,
+       struct netif *netif);
+Ip.h (middlewares\third_party\lwip\src\include\ipv4\lwip):183
+err_t ip_output_hinted(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
+       u8_t ttl, u8_t tos, u8_t proto, u8_t *addr_hint);
+#endif /* LWIP_NETIF_HWADDRHINT */
+Ip.h (middlewares\third_party\lwip\src\include\ipv4\lwip):187
+err_t ip_output_if_opt(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
+       u8_t ttl, u8_t tos, u8_t proto, struct netif *netif, void *ip_options,
+       u16_t optlen);
+Ip_addr.c (middlewares\third_party\lwip\src\core\ipv4):44
+const ip_addr_t ip_addr_any = { IPADDR_ANY };
+const ip_addr_t ip_addr_broadcast = { IPADDR_BROADCAST };
 
 /**
-Cmsis_os.h (drivers\cmsis\rtos\template):70
-#define osFeature_MessageQ     1       ///< Message Queues:  1=available, 0=not available
-#define osFeature_Signals      8       ///< maximum number of Signal Flags available per thread
-#define osFeature_Semaphore    30      ///< maximum count for \ref osSemaphoreCreate function
-Cmsis_os.h (drivers\cmsis\rtos\template):583
-#if (defined (osFeature_MessageQ)  &&  (osFeature_MessageQ != 0))     // Message Queues available
- 
-/// \brief Create a Message Queue Definition.
-Cmsis_os.h (middlewares\third_party\freertos\source\cmsis_rtos):219
-#define osFeature_MessageQ     1       ///< Message Queues:  1=available, 0=not available
-#define osFeature_Signals      8       ///< maximum number of Signal Flags available per thread
-#define osFeature_Semaphore    1      ///< osFeature_Semaphore function: 1=available, 0=not available
-Cmsis_os.h (middlewares\third_party\freertos\source\cmsis_rtos):741
-#if (defined (osFeature_MessageQ)  &&  (osFeature_MessageQ != 0))     // Message Queues available
+Ip_addr.c (middlewares\third_party\lwip\src\core\ipv4):57
+  ip_addr_t ipaddr;
+  ip4_addr_set_u32(&ipaddr, addr);
 
-/// \brief Create a Message Queue Definition.
+Ip_addr.c (middlewares\third_party\lwip\src\core\ipv4):132
+  ip_addr_t val;
+
+  if (ipaddr_aton(cp, &val)) {
+Ip_addr.c (middlewares\third_party\lwip\src\core\ipv4):152
+ipaddr_aton(const char *cp, ip_addr_t *addr)
+{
+  u32_t val;
+Ip_addr.c (middlewares\third_party\lwip\src\core\ipv4):261
+ipaddr_ntoa(const ip_addr_t *addr)
+{
+  static char str[16];
+Ip_addr.c (middlewares\third_party\lwip\src\core\ipv4):276
+char *ipaddr_ntoa_r(const ip_addr_t *addr, char *buf, int buflen)
+{
+  u32_t s_addr;
+Ip_addr.h (middlewares\third_party\lwip\src\include\ipv4\lwip):42
+/* This is the aligned version of ip_addr_t,
+   used as local variable, on the stack, etc. */
+struct ip_addr {
+Ip_addr.h (middlewares\third_party\lwip\src\include\ipv4\lwip):48
+/* This is the packed version of ip_addr_t,
+   used in network headers that are itself packed */
+#ifdef PACK_STRUCT_USE_INCLUDES
+Ip_addr.h (middlewares\third_party\lwip\src\include\ipv4\lwip):62
+/** ip_addr_t uses a struct for convenience only, so that the same defines can
+ * operate both on ip_addr_t as well as on ip_addr_p_t. */
+typedef struct ip_addr ip_addr_t;
+typedef struct ip_addr_packed ip_addr_p_t;
+
+Ip_addr.h (middlewares\third_party\lwip\src\include\ipv4\lwip):86
+extern const ip_addr_t ip_addr_any;
+extern const ip_addr_t ip_addr_broadcast;
+
+/** IP_ADDR_ can be used as a fixed IP address
+Ip_addr.h (middlewares\third_party\lwip\src\include\ipv4\lwip):92
+#define IP_ADDR_ANY         ((ip_addr_t *)&ip_addr_any)
+#define IP_ADDR_BROADCAST   ((ip_addr_t *)&ip_addr_broadcast)
+
+/** 255.255.255.255 */
+Ip_addr.h (middlewares\third_party\lwip\src\include\ipv4\lwip):158
+#define IPADDR2_COPY(dest, src) SMEMCPY(dest, src, sizeof(ip_addr_t))
+#endif
+
+Ip_addr.h (middlewares\third_party\lwip\src\include\ipv4\lwip):235
+int ipaddr_aton(const char *cp, ip_addr_t *addr);
+/** returns ptr to static buffer; not reentrant! */
+char *ipaddr_ntoa(const ip_addr_t *addr);
+char *ipaddr_ntoa_r(const ip_addr_t *addr, char *buf, int buflen);
+
+#ifdef __cplusplus
+Ip_frag.c (middlewares\third_party\lwip\src\core\ipv4):667
+ip_frag(struct pbuf *p, struct netif *netif, ip_addr_t *dest)
+{
+  struct pbuf *rambuf;
+Ip_frag.h (middlewares\third_party\lwip\src\include\ipv4\lwip):81
+err_t ip_frag(struct pbuf *p, struct netif *netif, ip_addr_t *dest);
+#endif /* IP_FRAG */
+
+Lwip.c (src):75
+ip_addr_t ipaddr;
+ip_addr_t netmask;
+ip_addr_t gw;
+
+/* Semaphore to signal Ethernet Link state update */
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):1089
+void snmp_insert_arpidx_tree(struct netif *ni, ip_addr_t *ip)
+{
+  struct mib_list_rootnode *at_rn;
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):1161
+void snmp_delete_arpidx_tree(struct netif *ni, ip_addr_t *ip)
+{
+  struct mib_list_rootnode *at_rn, *next, *del_rn[5];
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):1442
+  ip_addr_t dst;
+
+  if (dflt != 0)
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):1519
+  ip_addr_t dst;
+
+  if (dflt != 0)
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):2726
+  ip_addr_t* ipaddr_ret;
+#endif /* LWIP_ARP */
+  ip_addr_t ip;
+  struct netif *netif;
+
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):2759
+          ip_addr_t *dst = (ip_addr_t*)value;
+
+          *dst = *ipaddr_ret;
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):3074
+  ip_addr_t ip;
+  struct netif *netif = netif_list;
+
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):3094
+          ip_addr_t *dst = (ip_addr_t*)value;
+          *dst = netif->ip_addr;
+        }
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):3106
+          ip_addr_t *dst = (ip_addr_t*)value;
+          *dst = netif->netmask;
+        }
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):3214
+  ip_addr_t dest;
+  s32_t *ident;
+  u8_t id;
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):3244
+          ip_addr_t *dst = (ip_addr_t*)value;
+
+          if (ip_addr_isany(&dest))
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):3293
+          ip_addr_t *dst = (ip_addr_t*)value;
+
+          if (ip_addr_isany(&dest))
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):3340
+          ip_addr_t *dst = (ip_addr_t*)value;
+
+          if (ip_addr_isany(&dest))
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):3417
+  ip_addr_t* ipaddr_ret;
+#endif /* LWIP_ARP */
+  ip_addr_t ip;
+  struct netif *netif;
+
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):3450
+          ip_addr_t *dst = (ip_addr_t*)value;
+
+          *dst = *ipaddr_ret;
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):3775
+  ip_addr_t lip, rip;
+  u16_t lport, rport;
+  s32_t *ident;
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):3884
+  ip_addr_t ip;
+  u16_t port;
+
+Mib2.c (middlewares\third_party\lwip\src\core\snmp):3908
+          ip_addr_t *dst = (ip_addr_t*)value;
+          *dst = pcb->local_ip;
+        }
+Mib_structs.c (middlewares\third_party\lwip\src\core\snmp):136
+snmp_oidtoip(s32_t *ident, ip_addr_t *ip)
+{
+  IP4_ADDR(ip, ident[0], ident[1], ident[2], ident[3]);
+Mib_structs.c (middlewares\third_party\lwip\src\core\snmp):147
+snmp_iptooid(ip_addr_t *ip, s32_t *ident)
+{
+  ident[0] = ip4_addr1(ip);
+Msg_in.c (middlewares\third_party\lwip\src\core\snmp):61
+static void snmp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t *addr, u16_t port);
+static err_t snmp_pdu_header_check(struct pbuf *p, u16_t ofs, u16_t pdu_len, u16_t *ofs_ret, struct snmp_msg_pstat *m_stat);
+static err_t snmp_pdu_dec_varbindlist(struct pbuf *p, u16_t ofs, u16_t *ofs_ret, struct snmp_msg_pstat *m_stat);
+Msg_in.c (middlewares\third_party\lwip\src\core\snmp):822
+snmp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t *addr, u16_t port)
+{
+  struct snmp_msg_pstat *msg_ps;
+Msg_out.c (middlewares\third_party\lwip\src\core\snmp):58
+  ip_addr_t dip;
+  /* set to 0 when disabled, >0 when enabled */
+  u8_t enable;
+Msg_out.c (middlewares\third_party\lwip\src\core\snmp):95
+snmp_trap_dst_ip_set(u8_t dst_idx, ip_addr_t *dst)
+{
+  if (dst_idx < SNMP_TRAP_DESTINATIONS)
+Msg_out.c (middlewares\third_party\lwip\src\core\snmp):217
+  ip_addr_t dst_ip;
+  struct pbuf *p;
+  u16_t i,tot_len;
+Myudp.c (src):14
+void udp_server_receive_callback(void *arg, struct udp_pcb *upcb, struct pbuf *p, const ip_addr_t *addr, u16_t port);
+
+
+Myudp.c (src):61
+    const ip_addr_t *addr, \
+    u16_t port)
+{
+Netbuf.h (middlewares\third_party\lwip\src\include\lwip):50
+  ip_addr_t addr;
+  u16_t port;
+#if LWIP_NETBUF_RECVINFO || LWIP_CHECKSUM_ON_COPY
+Netbuf.h (middlewares\third_party\lwip\src\include\lwip):58
+  ip_addr_t toaddr;
+#endif /* LWIP_NETBUF_RECVINFO */
+#endif /* LWIP_NETBUF_RECVINFO || LWIP_CHECKSUM_ON_COPY */
+Netdb.c (middlewares\third_party\lwip\src\api):52
+  ip_addr_t *addr_list[2];
+  ip_addr_t addr;
+  char *aliases;
+};
+Netdb.c (middlewares\third_party\lwip\src\api):88
+  ip_addr_t addr;
+
+  /* buffer variables for lwip_gethostbyname() */
+Netdb.c (middlewares\third_party\lwip\src\api):93
+  HOSTENT_STORAGE ip_addr_t s_hostent_addr;
+  HOSTENT_STORAGE ip_addr_t *s_phostent_addr[2];
+
+  /* query host IP address */
+Netdb.c (middlewares\third_party\lwip\src\api):111
+  s_hostent.h_length = sizeof(ip_addr_t);
+  s_hostent.h_addr_list = (char**)&s_phostent_addr;
+
+Netdb.c (middlewares\third_party\lwip\src\api):132
+      LWIP_DEBUGF(DNS_DEBUG, ("hostent.h_addr_list[%i]-> == %s\n", idx, ip_ntoa((ip_addr_t*)s_hostent.h_addr_list[idx])));
+    }
+  }
+Netdb.c (middlewares\third_party\lwip\src\api):218
+  ret->h_length = sizeof(ip_addr_t);
+  ret->h_addr_list = (char**)&h->addr_list;
+
+Netdb.c (middlewares\third_party\lwip\src\api):271
+  ip_addr_t addr;
+  struct addrinfo *ai;
+  struct sockaddr_in *sa = NULL;
+Netif.c (middlewares\third_party\lwip\src\core):109
+  ip_addr_t loop_ipaddr, loop_netmask, loop_gw;
+  IP4_ADDR(&loop_gw, 127,0,0,1);
+  IP4_ADDR(&loop_ipaddr, 127,0,0,1);
+Netif.c (middlewares\third_party\lwip\src\core):139
+netif_add(struct netif *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
+  ip_addr_t *gw, void *state, netif_init_fn init, netif_input_fn input)
+{
+
+Netif.c (middlewares\third_party\lwip\src\core):221
+netif_set_addr(struct netif *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
+    ip_addr_t *gw)
+{
+  netif_set_ipaddr(netif, ipaddr);
+Netif.c (middlewares\third_party\lwip\src\core):323
+netif_set_ipaddr(struct netif *netif, ip_addr_t *ipaddr)
+{
+  /* TODO: Handling of obsolete pcbs */
+Netif.c (middlewares\third_party\lwip\src\core):388
+netif_set_gw(struct netif *netif, ip_addr_t *gw)
+{
+  ip_addr_set(&(netif->gw), gw);
+Netif.c (middlewares\third_party\lwip\src\core):409
+netif_set_netmask(struct netif *netif, ip_addr_t *netmask)
+{
+  snmp_delete_iprteidx_tree(0, netif);
+Netif.c (middlewares\third_party\lwip\src\core):611
+       ip_addr_t *ipaddr)
+{
+  struct pbuf *r;
+Netif.h (middlewares\third_party\lwip\src\include\lwip):119
+       ip_addr_t *ipaddr);
+/** Function prototype for netif->linkoutput functions. Only used for ethernet
+ * netifs. This function is called by ARP when a packet shall be sent.
+Netif.h (middlewares\third_party\lwip\src\include\lwip):131
+       ip_addr_t *group, u8_t action);
+
+/** Generic data structure used for all lwIP network interfaces.
+Netif.h (middlewares\third_party\lwip\src\include\lwip):141
+  ip_addr_t ip_addr;
+  ip_addr_t netmask;
+  ip_addr_t gw;
+
+  /** This function is called by the network device driver
+Netif.h (middlewares\third_party\lwip\src\include\lwip):259
+struct netif *netif_add(struct netif *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
+      ip_addr_t *gw, void *state, netif_init_fn init, netif_input_fn input);
+
+void
+netif_set_addr(struct netif *netif, ip_addr_t *ipaddr, ip_addr_t *netmask,
+      ip_addr_t *gw);
+void netif_remove(struct netif * netif);
+
+Netif.h (middlewares\third_party\lwip\src\include\lwip):275
+void netif_set_ipaddr(struct netif *netif, ip_addr_t *ipaddr);
+void netif_set_netmask(struct netif *netif, ip_addr_t *netmask);
+void netif_set_gw(struct netif *netif, ip_addr_t *gw);
+
+void netif_set_up(struct netif *netif);
+Netif.h (middlewares\third_party\lwip\src\include\lwip):311
+err_t netif_loop_output(struct netif *netif, struct pbuf *p, ip_addr_t *dest_ip);
+void netif_poll(struct netif *netif);
+#if !LWIP_NETIF_LOOPBACK_MULTITHREADING
+Netifapi.c (middlewares\third_party\lwip\src\api):99
+                   ip_addr_t *ipaddr,
+                   ip_addr_t *netmask,
+                   ip_addr_t *gw,
+                   void *state,
+                   netif_init_fn init,
+Netifapi.c (middlewares\third_party\lwip\src\api):127
+                        ip_addr_t *ipaddr,
+                        ip_addr_t *netmask,
+                        ip_addr_t *gw)
+{
+  struct netifapi_msg msg;
+Netifapi.h (middlewares\third_party\lwip\src\include\lwip):55
+      ip_addr_t *ipaddr;
+      ip_addr_t *netmask;
+      ip_addr_t *gw;
+      void *state;
+      netif_init_fn init;
+Netifapi.h (middlewares\third_party\lwip\src\include\lwip):77
+                                 ip_addr_t *ipaddr,
+                                 ip_addr_t *netmask,
+                                 ip_addr_t *gw,
+                                 void *state,
+                                 netif_init_fn init,
+Netifapi.h (middlewares\third_party\lwip\src\include\lwip):85
+                                 ip_addr_t *ipaddr,
+                                 ip_addr_t *netmask,
+                                 ip_addr_t *gw );
+
+err_t netifapi_netif_common    ( struct netif *netif,
+Ppp.c (middlewares\third_party\lwip\src\netif\ppp):810
+pppifOutput(struct netif *netif, struct pbuf *pb, ip_addr_t *ipaddr)
+{
+  int pd = (int)(size_t)netif->state;
+Ppp.h (middlewares\third_party\lwip\src\netif\ppp):93
+  ip_addr_t our_ipaddr, his_ipaddr, netmask, dns1, dns2;
+};
+
+Raw.c (middlewares\third_party\lwip\src\core):142
+raw_bind(struct raw_pcb *pcb, ip_addr_t *ipaddr)
+{
+  ip_addr_set(&pcb->local_ip, ipaddr);
+Raw.c (middlewares\third_party\lwip\src\core):162
+raw_connect(struct raw_pcb *pcb, ip_addr_t *ipaddr)
+{
+  ip_addr_set(&pcb->remote_ip, ipaddr);
+Raw.c (middlewares\third_party\lwip\src\core):203
+raw_sendto(struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *ipaddr)
+{
+  err_t err;
+Raw.c (middlewares\third_party\lwip\src\core):207
+  ip_addr_t *src_ip;
+  struct pbuf *q; /* q will be sent down the stack */
+  
+Raw.h (middlewares\third_party\lwip\src\include\lwip):61
+    ip_addr_t *addr);
+
+struct raw_pcb {
+Raw.h (middlewares\third_party\lwip\src\include\lwip):81
+err_t            raw_bind       (struct raw_pcb *pcb, ip_addr_t *ipaddr);
+err_t            raw_connect    (struct raw_pcb *pcb, ip_addr_t *ipaddr);
+
+void             raw_recv       (struct raw_pcb *pcb, raw_recv_fn recv, void *recv_arg);
+err_t            raw_sendto     (struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *ipaddr);
+err_t            raw_send       (struct raw_pcb *pcb, struct pbuf *p);
+
+Slipif.c (middlewares\third_party\lwip\src\netif):115
+slipif_output(struct netif *netif, struct pbuf *p, ip_addr_t *ipaddr)
+{
+  struct slipif_priv *priv;
+Snmp.h (middlewares\third_party\lwip\src\include\lwip):124
+void snmp_insert_arpidx_tree(struct netif *ni, ip_addr_t *ip);
+void snmp_delete_arpidx_tree(struct netif *ni, ip_addr_t *ip);
+
+/* IP */
+Snmp_msg.h (middlewares\third_party\lwip\src\include\lwip):226
+  ip_addr_t sip;
+  /* source UDP port */
+  u16_t sp;
+Snmp_msg.h (middlewares\third_party\lwip\src\include\lwip):265
+  ip_addr_t dip;
+
+  /* source enterprise ID (sysObjectID) */
+Snmp_msg.h (middlewares\third_party\lwip\src\include\lwip):293
+void snmp_trap_dst_ip_set(u8_t dst_idx, ip_addr_t *dst);
+
+/** Varbind-list functions. */
+Snmp_structs.h (middlewares\third_party\lwip\src\include\lwip):243
+void snmp_oidtoip(s32_t *ident, ip_addr_t *ip);
+void snmp_iptooid(ip_addr_t *ip, s32_t *ident);
+void snmp_ifindextonetif(s32_t ifindex, struct netif **netif);
+void snmp_netiftoifindex(struct netif *netif, s32_t *ifidx);
+Sockets.c (middlewares\third_party\lwip\src\api):316
+  ip_addr_t naddr;
+  u16_t port;
+  int newsock;
+Sockets.c (middlewares\third_party\lwip\src\api):408
+  ip_addr_t local_addr;
+  u16_t local_port;
+  err_t err;
+Sockets.c (middlewares\third_party\lwip\src\api):492
+    ip_addr_t remote_addr;
+    u16_t remote_port;
+
+Sockets.c (middlewares\third_party\lwip\src\api):565
+  ip_addr_t        *addr;
+  u16_t            port;
+  u8_t             done = 0;
+Sockets.c (middlewares\third_party\lwip\src\api):667
+      ip_addr_t fromaddr;
+      if (from && fromlen) {
+        struct sockaddr_in sin;
+Sockets.c (middlewares\third_party\lwip\src\api):830
+    ip_addr_t *remote_addr;
+
+#if LWIP_NETIF_TX_SINGLE_PBUF
+Sockets.c (middlewares\third_party\lwip\src\api):1412
+  ip_addr_t naddr;
+
+  sock = get_socket(s);
+Sockets.c (middlewares\third_party\lwip\src\api):2180
+        ip_addr_t if_addr;
+        ip_addr_t multi_addr;
+        inet_addr_to_ipaddr(&if_addr, &imr->imr_interface);
+        inet_addr_to_ipaddr(&multi_addr, &imr->imr_multiaddr);
+Tcp.c (middlewares\third_party\lwip\src\core):433
+tcp_bind(struct tcp_pcb *pcb, ip_addr_t *ipaddr, u16_t port)
+{
+  int i;
+Tcp.c (middlewares\third_party\lwip\src\core):684
+tcp_connect(struct tcp_pcb *pcb, ip_addr_t *ipaddr, u16_t port,
+      tcp_connected_fn connected)
+{
+Tcp.c (middlewares\third_party\lwip\src\core):1586
+tcp_eff_send_mss(u16_t sendmss, ip_addr_t *addr)
+{
+  u16_t mss_s;
+Tcp.h (middlewares\third_party\lwip\src\include\lwip):342
+err_t            tcp_bind    (struct tcp_pcb *pcb, ip_addr_t *ipaddr,
+                              u16_t port);
+err_t            tcp_connect (struct tcp_pcb *pcb, ip_addr_t *ipaddr,
+                              u16_t port, tcp_connected_fn connected);
+
+Tcp_impl.h (middlewares\third_party\lwip\src\include\lwip):445
+       ip_addr_t *local_ip, ip_addr_t *remote_ip,
+       u16_t local_port, u16_t remote_port);
+
+Tcp_impl.h (middlewares\third_party\lwip\src\include\lwip):454
+u16_t tcp_eff_send_mss(u16_t sendmss, ip_addr_t *addr);
+#endif /* TCP_CALCULATE_EFF_SEND_MSS */
+
+Tcp_out.c (middlewares\third_party\lwip\src\core):1200
+  ip_addr_t *local_ip, ip_addr_t *remote_ip,
+  u16_t local_port, u16_t remote_port)
+{
+Udp.c (middlewares\third_party\lwip\src\core):492
+  ip_addr_t *dst_ip, u16_t dst_port)
+{
+#if LWIP_CHECKSUM_ON_COPY
+Udp.c (middlewares\third_party\lwip\src\core):500
+udp_sendto_chksum(struct udp_pcb *pcb, struct pbuf *p, ip_addr_t *dst_ip,
+                  u16_t dst_port, u8_t have_chksum, u16_t chksum)
+{
+Udp.c (middlewares\third_party\lwip\src\core):550
+  ip_addr_t *dst_ip, u16_t dst_port, struct netif *netif)
+{
+#if LWIP_CHECKSUM_ON_COPY
+Udp.c (middlewares\third_party\lwip\src\core):558
+udp_sendto_if_chksum(struct udp_pcb *pcb, struct pbuf *p, ip_addr_t *dst_ip,
+                     u16_t dst_port, struct netif *netif, u8_t have_chksum,
+                     u16_t chksum)
+Udp.c (middlewares\third_party\lwip\src\core):564
+  ip_addr_t *src_ip;
+  err_t err;
+  struct pbuf *q; /* q will be sent down the stack */
+Udp.c (middlewares\third_party\lwip\src\core):766
+udp_bind(struct udp_pcb *pcb, ip_addr_t *ipaddr, u16_t port)
+{
+  struct udp_pcb *ipcb;
+Udp.c (middlewares\third_party\lwip\src\core):853
+udp_connect(struct udp_pcb *pcb, ip_addr_t *ipaddr, u16_t port)
+{
+  struct udp_pcb *ipcb;
+Udp.h (middlewares\third_party\lwip\src\include\lwip):88
+    ip_addr_t *addr, u16_t port);
+
+
+Udp.h (middlewares\third_party\lwip\src\include\lwip):105
+  ip_addr_t multicast_ip;
+#endif /* LWIP_IGMP */
+
+Udp.h (middlewares\third_party\lwip\src\include\lwip):125
+err_t            udp_bind       (struct udp_pcb *pcb, ip_addr_t *ipaddr,
+                                 u16_t port);
+err_t            udp_connect    (struct udp_pcb *pcb, ip_addr_t *ipaddr,
+                                 u16_t port);
+void             udp_disconnect (struct udp_pcb *pcb);
+Udp.h (middlewares\third_party\lwip\src\include\lwip):133
+                                 ip_addr_t *dst_ip, u16_t dst_port,
+                                 struct netif *netif);
+err_t            udp_sendto     (struct udp_pcb *pcb, struct pbuf *p,
+                                 ip_addr_t *dst_ip, u16_t dst_port);
+err_t            udp_send       (struct udp_pcb *pcb, struct pbuf *p);
+
+Udp.h (middlewares\third_party\lwip\src\include\lwip):141
+                                 ip_addr_t *dst_ip, u16_t dst_port,
+                                 struct netif *netif, u8_t have_chksum,
+                                 u16_t chksum);
+Udp.h (middlewares\third_party\lwip\src\include\lwip):145
+                                 ip_addr_t *dst_ip, u16_t dst_port,
+                                 u8_t have_chksum, u16_t chksum);
+err_t            udp_send_chksum(struct udp_pcb *pcb, struct pbuf *p,
