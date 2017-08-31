@@ -132,7 +132,7 @@
 #define LWIP_NETIF_LINK_CALLBACK        1
 
 
-//#define USE_DHCP       /* enable DHCP, if disabled static address is used*/
+#define USE_DHCP       /* enable DHCP, if disabled static address is used*/
 
 /* USER CODE END 1 */
 #define USE_LCD 
@@ -141,7 +141,7 @@
 #define LWIP_DEBUG 1
 
 #define LWIP_ICMP 1
-#define ICMP_DEBUG LWIP_DBG_ON
+//#define ICMP_DEBUG LWIP_DBG_ON
 
 #define LWIP_DEBUG 1
 
