@@ -3,6 +3,7 @@
 #include "cmsis_os.h"
 
 #include "mymessage.h"
+#include "myled.h"
 
 UART_HandleTypeDef uartPlc;
 extern uint8_t cUartPlc;
@@ -24,18 +25,8 @@ static uint8_t PLC_RX_BUFFER[PLC_RX_BUFFER_LEN];
 static uint8_t indexPlcRxBuffer;
 static uint8_t lenPlcRxBuffer;
 
-
-// pool
-osPoolDef(plcPoolHiPrio, 1, NetMessage_t);
-osPoolId  plcPoolHiPrio;
-
-osPoolDef(plcPoolLoPrio, 3, NetMessage_t);
-osPoolId  plcPoolLoPrio;
-
-//queue
-osMessageQId plcQueueHiPrio;
-osMessageQId plcQueueLoPrio;
-
+osMailQId  plcMailHiPrio;
+osMailQId  plcMailLoPrio;
 
 
 void Serial_Plc_Init()
@@ -134,38 +125,73 @@ void  UART_Plc_receive()
 void StartPlcTask(void const * argument)
 {
     uint8_t i;
-      NetMessage_t*rptr;
-        osEvent  evt;
+    NetMessage_t*rptr;
+    NetMail_t   *pMail;
+    osEvent  evt;
+    osStatus status;
 
     statePlc = STATE_PLC_UNLOCK;
-    indexPlcRxBuffer = 0;
+
+    printf("Task Plc started\n");
 
     UART_Plc_receive();
 
     for(;;)
     {
 
-        evt = osMessageGet(plcQueueHiPriority, 10);  // wait for message
-    if (evt.status == osEventMessage) {
-      rptr = evt.value.p;
-      printf ("\nVoltage: %.2f V\n", rptr->voltage);
-      printf ("Current: %.2f A\n", rptr->current);
-      printf ("Number of cycles: %d\n", rptr->counter);
-      osPoolFree(mpool, rptr);                  // free memory allocated for 
-message
-    }
-        
+        evt = osMailGet(plcMailHiPrio, 0);
+
+        if(evt.status == osEventMail ){
+            pMail = (NetMail_t*)evt.value.p;
+            printf("\nPlc receive from hmi:\n");
+            printf("type: %d\n", pMail->type);
+            printf("len: %d\n", pMail->length);
+
+            for(i=0; i< pMail->length; i++){
+                printf("%02x ", pMail->data[i]);
+
+            }
+            printf("\n");
+
+            HAL_UART_Transmit(&uartPlc, pMail->data, pMail->length, 100);
+
+            printf("Send out to plc\n");
+
+           
+            
+            osMailFree(plcMailHiPrio, pMail);
+
+        }
+
+
         if(signalPlcRx == True)
         {
             printf("\nPlc RX:%d:\n", lenPlcRxBuffer);
 
+            pMail =  (NetMail_t*)osMailAlloc(hmiMail, 100);
+
+            if(pMail != NULL)
+            {
+                pMail->type = TYPE_MESSAGE_PLC_2_HMI;
+                pMail->length = lenHmiRxBuffer;
+                
             for(i=0; i< lenPlcRxBuffer; i++)
             {
                 printf("%02x ", PLC_RX_BUFFER[i]);
+                pMail->data[i] = PLC_RX_BUFFER[i];
             }
             printf("\n");
 
-            // send out the received cmd to PLC
+                osMailPut(hmiMail, pMail);
+
+            }
+
+
+
+            // send out the received cmd to hmi
+             
+            
+            
 
             signalPlcRx = False;
         }
@@ -218,18 +244,27 @@ void UART_Plc_Handle_Byte(uint8_t c)
 }
 void Plc_Task_Init()
 {
-plcPoolHiPrio = osPoolCreate(osPool(plcPoolHiPrio));
-    osMessageQDef(plcqueueHi, 1, NetMessage_t);
-    plcQueueHiPrio= osMessageCreate(osMessageQ(plcqueueHi), NULL);
+    osMailQDef(plcmailhi, 2, NetMail_t);
+    plcMailHiPrio = osMailCreate(osMailQ(plcmailhi), NULL);
 
+    if(plcMailHiPrio != NULL){
+        printf("plc mail hi created\n");
+    }
     
-    osMessageQDef(plcqueueLo, 3, NetMessage_t);
-    plcQueueLoPrio = osMessageCreate(osMessageQ(plcqueueLo), NULL);
+    osMailQDef(plcmaillo, 4, NetMail_t);
+    plcMailLoPrio = osMailCreate(osMailQ(plcmaillo), NULL);
 
-    
+    if(plcMailLoPrio != NULL){
+        printf("plc mail lo created\n");
+    }
+
     osThreadDef(plcTask, StartPlcTask, osPriorityHigh, 0, 128);
     plcTaskHandle = osThreadCreate(osThread(plcTask), NULL);
-    printf("Plc task started\n");
+
+    if(plcTaskHandle == NULL){
+        printf("plc task create fail\n");
+    }   
+    //printf("Plc task started\n");
 }
 
 

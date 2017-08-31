@@ -3,6 +3,7 @@
 #include "cmsis_os.h"
 
 #include "mymessage.h"
+#include "myled.h"
 
 UART_HandleTypeDef uartPlc;
 extern uint8_t cUartPlc;
@@ -18,24 +19,16 @@ extern const uint32_t STOPWIDTH[];
 
 extern const uint32_t PARITY[];
 
+extern osMailQId  hmiMail;
+
 static uint8_t statePlc;
 
 static uint8_t PLC_RX_BUFFER[PLC_RX_BUFFER_LEN];
 static uint8_t indexPlcRxBuffer;
 static uint8_t lenPlcRxBuffer;
 
-
-// pool
-
-osPoolId  plcPoolHiPrio;
-
-//osPoolDef(plcPoolLoPrio, 3, NetMessage_t);
-//osPoolId  plcPoolLoPrio;
-
-//queue
-osMessageQId plcQueueHiPrio;
-osMessageQId plcQueueLoPrio;
-
+osMailQId  plcMailHiPrio;
+osMailQId  plcMailLoPrio;
 
 
 void Serial_Plc_Init()
@@ -135,39 +128,75 @@ void StartPlcTask(void const * argument)
 {
     uint8_t i;
     NetMessage_t*rptr;
+    NetMail_t   *pMail;
     osEvent  evt;
+    osStatus status;
 
     statePlc = STATE_PLC_UNLOCK;
-    indexPlcRxBuffer = 0;
+
+    printf("Task Plc started\n");
 
     UART_Plc_receive();
 
     for(;;)
     {
 
-        evt = osMessageGet(plcQueueHiPrio, 10);  // wait for message
-        
-        if(evt.status == osEventMessage)
-        {
-            rptr =(NetMessage_t*) evt.value.p;
-            printf("\ntype: %d V\n", rptr->type);
-            printf("len: %d A\n", rptr->length);
-            //printf("Number of cycles: %d\n", rptr->counter);
-            osPoolFree(plcPoolHiPrio, rptr);                  // free memory allocated 
-            // for message
-        }
+        evt = osMailGet(plcMailHiPrio, 0);
 
-        if(signalPlcRx == True)
+        if(evt.status == osEventMail)
         {
-            printf("\nPlc RX:%d:\n", lenPlcRxBuffer);
+            pMail = (NetMail_t*)evt.value.p;
+            printf("\nPlc RX from hmi:\n");
+            printf("type: %d\n", pMail->type);
+            printf("len: %d\n", pMail->length);
 
-            for(i=0; i< lenPlcRxBuffer; i++)
+            for(i=0; i< pMail->length; i++)
             {
-                printf("%02x ", PLC_RX_BUFFER[i]);
+                printf("%02x ", pMail->data[i]);
+
             }
             printf("\n");
 
-            // send out the received cmd to PLC
+            HAL_UART_Transmit(&uartPlc, pMail->data, pMail->length, 100);
+
+            printf("--> Send out to Real-Plc\n");
+
+
+
+            osMailFree(plcMailHiPrio, pMail);
+
+        }
+
+
+        if(signalPlcRx == True)
+        {
+            printf("\n<-- Plc RX from Real_Plc:%d:\n", lenPlcRxBuffer);
+
+            pMail = (NetMail_t*)osMailAlloc(hmiMail, 100);
+
+            if(pMail != NULL)
+            {
+                pMail->type = TYPE_MESSAGE_PLC_2_HMI;
+                pMail->length = lenPlcRxBuffer;
+
+                for(i=0; i< lenPlcRxBuffer; i++)
+                {
+                    printf("%02x ", PLC_RX_BUFFER[i]);
+                    pMail->data[i] = PLC_RX_BUFFER[i];
+                }
+                printf("\n");
+
+                osMailPut(hmiMail, pMail);
+                printf("send it to Hmi\n");
+
+            }
+
+
+
+            // send out the received cmd to hmi
+
+
+
 
             signalPlcRx = False;
         }
@@ -220,20 +249,30 @@ void UART_Plc_Handle_Byte(uint8_t c)
 }
 void Plc_Task_Init()
 {
-    osPoolDef(plcpool, 3, NetMessage_t);
-    plcPoolHiPrio = osPoolCreate(osPool(plcpool));
-    
-    osMessageQDef(plcqueueHi, 1, NetMessage_t);
-    plcQueueHiPrio= osMessageCreate(osMessageQ(plcqueueHi), NULL);
+    osMailQDef(plcmailhi, 2, NetMail_t);
+    plcMailHiPrio = osMailCreate(osMailQ(plcmailhi), NULL);
 
-    
-    osMessageQDef(plcqueueLo, 3, NetMessage_t);
-    plcQueueLoPrio = osMessageCreate(osMessageQ(plcqueueLo), NULL);
+    if(plcMailHiPrio != NULL)
+    {
+        printf("plc mail hi created\n");
+    }
 
+    osMailQDef(plcmaillo, 4, NetMail_t);
+    plcMailLoPrio = osMailCreate(osMailQ(plcmaillo), NULL);
+
+    if(plcMailLoPrio != NULL)
+    {
+        printf("plc mail lo created\n");
+    }
 
     osThreadDef(plcTask, StartPlcTask, osPriorityHigh, 0, 128);
     plcTaskHandle = osThreadCreate(osThread(plcTask), NULL);
-    printf("Plc task started\n");
+
+    if(plcTaskHandle == NULL)
+    {
+        printf("plc task create fail\n");
+    }
+    //printf("Plc task started\n");
 }
 
 

@@ -1,17 +1,21 @@
----- Static IP Address Matches (4 in 2 files) ----
-App_ethernet.c (src):71
-        printf("Static IP address: %s\n", iptxt);
+---- osFeature_messageq Matches (5 in 3 files) ----
+Cmsis_os.c (middlewares\third_party\freertos\source\cmsis_rtos):927
+#if (defined (osFeature_MessageQ)  &&  (osFeature_MessageQ != 0)) /* Use Message Queues */
 
-        /* Turn On LED 3 to indicate ETH and LwIP init success*/
-App_ethernet.c (src):124
-        printf("Static IP address: %s\n", iptxt);
+/**
+Cmsis_os.h (drivers\cmsis\rtos\template):70
+#define osFeature_MessageQ     1       ///< Message Queues:  1=available, 0=not available
+#define osFeature_Signals      8       ///< maximum number of Signal Flags available per thread
+#define osFeature_Semaphore    30      ///< maximum count for \ref osSemaphoreCreate function
+Cmsis_os.h (drivers\cmsis\rtos\template):583
+#if (defined (osFeature_MessageQ)  &&  (osFeature_MessageQ != 0))     // Message Queues available
+ 
+/// \brief Create a Message Queue Definition.
+Cmsis_os.h (middlewares\third_party\freertos\source\cmsis_rtos):219
+#define osFeature_MessageQ     1       ///< Message Queues:  1=available, 0=not available
+#define osFeature_Signals      8       ///< maximum number of Signal Flags available per thread
+#define osFeature_Semaphore    1      ///< osFeature_Semaphore function: 1=available, 0=not available
+Cmsis_os.h (middlewares\third_party\freertos\source\cmsis_rtos):741
+#if (defined (osFeature_MessageQ)  &&  (osFeature_MessageQ != 0))     // Message Queues available
 
-        LED4_Off();
-App_ethernet.c (src):237
-                    printf("Static IP address  : %s\n", iptxt);
-
-                    IP_ADDRESS[0] =IP_ADDR0;
-Lwip.h (inc):79
-/*Static IP ADDRESS*/
-// Added by Yang
-#define IP_ADDR0   192
+/// \brief Create a Message Queue Definition.

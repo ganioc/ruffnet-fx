@@ -9,6 +9,7 @@
 #include "mye2prom.h"
 #include "myserial_log.h"
 #include "myserial_hmi.h"
+#include "myserial_plc.h"
 
 
 static const char PRODUCT_NAME[]= "RuffNet-FX";
@@ -53,9 +54,8 @@ void Periph_Init()
     E2PROM_Init();
     
     Serial_Hmi_Init();//uart3
+    Serial_Plc_Init(); //uart2 
 
     LCD_Init();
-
-
 
 }

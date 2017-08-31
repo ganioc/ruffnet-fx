@@ -21,8 +21,10 @@ extern const uint32_t STOPWIDTH[];
 
 extern const uint32_t PARITY[];
 
-extern osMessageQId plcQueueHiPrio;
-extern osPoolId  plcPoolHiPrio;
+// osMessageQId plcQueueHi;
+//extern osMessageQId plcQueueHiPrio;
+//extern osPoolId  plcPool;
+extern osMailQId  plcMailHiPrio;
 
 static uint8_t stateHmi;
 
@@ -30,7 +32,8 @@ static uint8_t HMI_RX_BUFFER[HMI_RX_BUFFER_LEN];
 static uint8_t indexHmiRxBuffer;
 static uint8_t lenHmiRxBuffer;
 
-osMessageQId hmiQueue;
+//osMessageQId hmiQueue;
+osMailQId  hmiMail;
 
 
 void Serial_Hmi_Init()
@@ -129,38 +132,63 @@ void StartHmiTask(void const * argument)
 {
     uint8_t i;
     NetMessage_t*mptr;
- 
-  
+    NetMail_t * pMail;
+        osEvent  evt;
+    osStatus status;
 
     stateHmi = STATE_HMI_UNLOCK;
     indexHmiRxBuffer = 0;
+
+    printf("Task Hmi started\n");
 
     UART_Hmi_receive();
 
     for(;;)
     {
-         if(signalHmiRx == True)
-        {
-            printf("\nHmi RX:%d:\n", lenHmiRxBuffer);
+        evt = osMailGet(hmiMail, 0);
 
-            //mptr = (NetMessage_t*)osPoolAlloc(plcPoolHiPrio);         // Allocate memory for the message
-            
-            //mptr->type = TYPE_MESSAGE_HMI_2_PLC;
-            //mptr->length = lenHmiRxBuffer;
+        if(evt.status == osEventMail ){
+            pMail = (NetMail_t*)evt.value.p;
+            printf("\nHmi receive from plc:\n");
+            printf("type: %d\n", pMail->type);
+            printf("len: %d\n", pMail->length);
 
-            for(i=0; i< lenHmiRxBuffer; i++){
-                printf("%02x ", HMI_RX_BUFFER[i]);
-                //mptr->data[i] = HMI_RX_BUFFER[i];
+            for(i=0; i< pMail->length; i++){
+                printf("%02x ", pMail->data[i]);
+
             }
             printf("\n");
 
-            // send out the received cmd to PLC
+            HAL_UART_Transmit(&uartHmi, pMail->data, pMail->length, 100);
 
-            //if(osMessagePut(plcQueueHiPrio, (uint32_t)mptr, osWaitForever) != osOK)  {
-            //    printf("Hmi 2 Plc message queue fail\n");
-
-            //}
+            printf("--> Send out to Real-hmi\n");
             
+            osMailFree(hmiMail, pMail);
+
+        }
+        
+        if(signalHmiRx == True)
+        {
+            printf("\n<-- Hmi RX from Real-Hmi:%d:\n", lenHmiRxBuffer);
+
+            pMail = (NetMail_t*)osMailAlloc(plcMailHiPrio, 100);
+
+            if(pMail != NULL)
+            {
+                pMail->type = TYPE_MESSAGE_HMI_2_PLC;
+                pMail->length = lenHmiRxBuffer;
+                for(i=0; i< lenHmiRxBuffer; i++)
+                {
+                    printf("%02x ", HMI_RX_BUFFER[i]);
+                    pMail->data[i] = HMI_RX_BUFFER[i];
+                }
+                printf("\n");
+
+                osMailPut(plcMailHiPrio, pMail);
+                printf("send it to Plc\n");
+
+            }
+
             signalHmiRx = False;
         }
         //printf("Hello\n");
@@ -181,11 +209,12 @@ void UART_Hmi_Handle_Byte(uint8_t c)
             {
                 stateHmi = STATE_HMI_BODY;
                 HMI_RX_BUFFER[indexHmiRxBuffer++] = c;
-                
+
             }
             break;
         case STATE_HMI_BODY:
-            if(c == END_HMI){
+            if(c == END_HMI)
+            {
                 stateHmi = STATE_HMI_CRCH;
             }
             HMI_RX_BUFFER[indexHmiRxBuffer++] = c;
@@ -210,13 +239,26 @@ void UART_Hmi_Handle_Byte(uint8_t c)
 }
 void Hmi_Task_Init()
 {
+    osMailQDef(hmimail, 2, NetMail_t);
+    hmiMail= osMailCreate(osMailQ(hmimail), NULL);
 
-    osMessageQDef(hmiqueue, 1, NetMessage_t);
-    hmiQueue= osMessageCreate(osMessageQ(hmiqueue), NULL);
+    if(hmiMail!= NULL){
+        printf("hmi mail hi created\n");
+    }
     
+    //osMessageQDef(hmiqueue, 1, NetMessage_t);
+    //hmiQueue= osMessageCreate(osMessageQ(hmiqueue), NULL);
+
+
+    //if(hmiQueue != NULL)
+    //{
+    //    printf("hmiQueue created\n");
+    //}
+
+
     osThreadDef(hmiTask, StartHmiTask, osPriorityHigh, 0, 128);
     hmiTaskHandle = osThreadCreate(osThread(hmiTask), NULL);
-    printf("Hmi task started\n");
+    //printf("Hmi task started\n");
 }
 
 

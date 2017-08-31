@@ -13,9 +13,16 @@
 typedef struct NetMessage{
     uint8_t type;
     uint8_t length;
-    uint8_t data[NET_MESSAGE_LEN];
+    uint32_t data;
+    uint32_t block;
 
 } NetMessage_t;
 
+typedef struct NetMail{
+    uint8_t type;
+    uint8_t length;
+    uint8_t  data[NET_MESSAGE_LEN];
+    //uint32_t block;
 
+} NetMail_t;
 #endif

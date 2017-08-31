@@ -106,6 +106,9 @@ void Serial_Log_MspDeInit()
 
 void StartLogTask(void const * argument)
 {
+
+    printf("task Log started\n");
+        
     UART_Log_receive();
 
     for(;;)
@@ -133,7 +136,7 @@ void Log_Task_Init()
 {
     osThreadDef(logTask, StartLogTask, osPriorityNormal, 0, 128);
     logTaskHandle = osThreadCreate(osThread(logTask), NULL);
-    printf("Log task started\n");
+
 }
 
 void UART_Log_Handle_Byte(uint8_t c)
