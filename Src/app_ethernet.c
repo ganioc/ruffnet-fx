@@ -162,6 +162,8 @@ void dhcp_do(struct netif *netif)
     struct ip_addr netmask;
     struct ip_addr gw;
     uint32_t IPaddress;
+    uint32_t IPnetmask;
+    uint32_t IPgw;
     IpInfo_t * pIp = getIpInfoP();
 
     switch(DHCP_state)
@@ -185,6 +187,10 @@ void dhcp_do(struct netif *netif)
             /* Read the new IP address */
             IPaddress = netif->ip_addr.addr;
 
+            // add by Yang
+            IPnetmask = netif->netmask.addr;
+            IPgw = netif->gw.addr;
+
             if(IPaddress!=0)
             {
                 DHCP_state = DHCP_ADDRESS_ASSIGNED;
@@ -205,6 +211,31 @@ void dhcp_do(struct netif *netif)
 
                 printf("IP address assigned by a DHCP server: %s\n", iptxt);
 
+                // store it inot the  ip info struct
+                pIp->ip[0] = iptab[3];
+                pIp->ip[1] = iptab[2];
+                pIp->ip[2] = iptab[1];
+                pIp->ip[3] = iptab[0];
+                
+                printf("ip  :%d.%d.%d.%d\n",pIp->ip[0],pIp->ip[1],pIp->ip[2],pIp->ip[3]);
+
+                // netmask
+
+                pIp->netmask[0] = (uint8_t)IPnetmask;
+                pIp->netmask[1] = (uint8_t)(IPnetmask>> 8);
+                pIp->netmask[2] = (uint8_t)(IPnetmask>> 16);
+                pIp->netmask[3] = (uint8_t)(IPnetmask >> 24);
+
+                printf("netmask:%d.%d.%d.%d\n",pIp->netmask[0],pIp->netmask[1],pIp->netmask[2],pIp->netmask[3]);
+
+                pIp->gwip[0] =(uint8_t) IPgw;
+                pIp->gwip[1] = (uint8_t)(IPgw>> 8);
+                pIp->gwip[2] = (uint8_t)(IPgw>> 16);
+                pIp->gwip[3] = (uint8_t)(IPgw >> 24);
+                
+                
+                printf("gw :%d.%d.%d.%d\n",pIp->gwip[0],pIp->gwip[1],pIp->gwip[2],pIp->gwip[3]);
+                
                 LED3_On();
 #endif
             }
@@ -219,12 +250,15 @@ void dhcp_do(struct netif *netif)
                     dhcp_stop(netif);
 
                     /* Static address used */
-                    //IP4_ADDR(&ipaddr, IP_ADDR0,IP_ADDR1, IP_ADDR2, IP_ADDR3);
-                    //IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
-                    //IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+                    printf("ip  :%d.%d.%d.%d\n",pIp->ip[0],pIp->ip[1],pIp->ip[2],pIp->ip[3]);
+                    printf("netmask:%d.%d.%d.%d\n",pIp->netmask[0],pIp->netmask[1],pIp->netmask[2],pIp->netmask[3]);
+                    printf("gw :%d.%d.%d.%d\n",pIp->gwip[0],pIp->gwip[1],pIp->gwip[2],pIp->gwip[3]);
+                    
                     IP4_ADDR(&ipaddr, pIp->ip[0],pIp->ip[1], pIp->ip[2], pIp->ip[3]);
-                    IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
+                    //IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
+                    IP4_ADDR(&netmask, pIp->netmask[0],pIp->netmask[1],pIp->netmask[2],pIp->netmask[3]);
                     IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+                    
                     netif_set_addr(netif, &ipaddr, &netmask, &gw);
 
 #ifdef USE_LCD

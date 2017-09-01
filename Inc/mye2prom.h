@@ -40,10 +40,12 @@
 #define DEFAULT_IP2                    168
 #define DEFAULT_IP3                    1
 #define DEFAULT_IP4                    150
+
 #define DEFAULT_NETMASK1   255
 #define DEFAULT_NETMASK2   255
 #define DEFAULT_NETMASK3   255
-#define DEFAULT_NETMASK4   255
+#define DEFAULT_NETMASK4   0
+
 #define DEFAULT_GW1  192
 #define DEFAULT_GW2  168
 #define DEFAULT_GW3  1

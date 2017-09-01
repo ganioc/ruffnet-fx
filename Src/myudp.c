@@ -227,19 +227,6 @@ void udp_server_receive_callback(void *arg, struct udp_pcb *upcb, struct pbuf *p
 
     }
 
-
-
-    /* Connect to the remote client */
-    //udp_connect(upcb, addr, port);
-
-    //Send data to plc
-
-    /* Tell the client that we have accepted it */
-    //udp_send(upcb, p);
-
-    /* free the UDP connection, so we can accept new clients */
-    //udp_disconnect(upcb);
-
     /* Free the p buffer */
     pbuf_free(p);
 
