@@ -106,6 +106,12 @@
 #define configUSE_MUTEXES                        1
 #define configQUEUE_REGISTRY_SIZE                8
 
+// Added by Yang
+#define configUSE_TIMERS    1
+#define configTIMER_TASK_PRIORITY    (2)
+#define configTIMER_QUEUE_LENGTH     10
+#define configTIMER_TASK_STACK_DEPTH (configMINIMAL_STACK_SIZE * 2)
+
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES                    0
 #define configMAX_CO_ROUTINE_PRIORITIES          ( 2 )

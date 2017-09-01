@@ -20,6 +20,7 @@ extern const uint32_t STOPWIDTH[];
 extern const uint32_t PARITY[];
 
 extern osMailQId  hmiMail;
+extern osMailQId  udpMail;
 
 static uint8_t statePlc;
 
@@ -35,6 +36,31 @@ osMailQId  plcMailLoPrio;
 static uint8_t currentClientId = NULL_ID;
 static uint8_t bPlcInSession = False;
 
+osTimerId timerTimeout;
+uint32_t      delayTimeout = PLC_MESSAGE_TIMEOUT;
+
+
+static void TimerHandler(void const *argument)
+{
+    (void) argument;
+
+    bPlcInSession = False;
+    printf("Plc visit timeout");
+
+}
+
+void StartTimer()
+{
+    printf("start timer %d ms\n",delayTimeout);
+
+    osTimerStart(timerTimeout, delayTimeout);
+
+}
+void StopTimer()
+{
+    printf("timer stopped\n");
+    osTimerStop(timerTimeout);
+}
 
 void Serial_Plc_Init()
 {
@@ -129,7 +155,7 @@ void CheckHiMailBox()
 {
     NetMail_t   *pMail;
     osEvent  evt;
-    //osStatus status;
+
     uint8_t i;
 
     if(bPlcInSession == True)
@@ -158,10 +184,12 @@ void CheckHiMailBox()
         printf("\n");
 
         currentClientId = pMail->clientId;
-        
+
         bPlcInSession = True;
 
         HAL_UART_Transmit(&uartPlc, pMail->data, pMail->length, 100);
+
+        StartTimer();
 
         printf("--> Send out to Real-Plc\n");
 
@@ -175,7 +203,6 @@ void CheckLoMailBox()
 {
     NetMail_t   *pMail;
     osEvent  evt;
-    //osStatus status;
     uint8_t i;
 
     if(bPlcInSession == True)
@@ -189,8 +216,8 @@ void CheckLoMailBox()
     if(evt.status == osEventMail)
     {
         pMail = (NetMail_t*)evt.value.p;
-        printf("\nPlc RX from :\n");
-        //printf("type: %d\n", pMail->type);
+        printf("\nPlc RX from : %d\n", pMail->clientId);
+
         printf("len: %d\n", pMail->length);
 
         for(i=0; i< pMail->length; i++)
@@ -201,10 +228,12 @@ void CheckLoMailBox()
         printf("\n");
 
         currentClientId = pMail->clientId;
-        
+
         bPlcInSession = True;
 
         HAL_UART_Transmit(&uartPlc, pMail->data, pMail->length, 100);
+
+        StartTimer();
 
         printf("--> Send out to Real-Plc\n");
 
@@ -218,56 +247,78 @@ void CheckLoMailBox()
 void checkPLCUart()
 {
     NetMail_t   *pMail;
-    //osEvent  evt;
-    //osStatus status;
+
     uint8_t i;
 
-    if(signalPlcRx == True)
+    if(signalPlcRx == False)
     {
-        printf("\n<-- Plc RX from Real_Plc:%d:\n", lenPlcRxBuffer);
+        return;
 
-
-        if(bPlcInSession == False)
-        {
-            // Won't process it
-            printf("%d bytes got from PLC, no client\n", lenPlcRxBuffer);
-            
-        }
-        else
-        {
-            pMail = (NetMail_t*)osMailAlloc(hmiMail, 100);
-
-            if(pMail != NULL)
-            {
-                //pMail->type = TYPE_MESSAGE_PLC_2_HMI;
-                pMail->clientId = currentClientId;
-                pMail->serverId = PLC_ID;
-                pMail->length = lenPlcRxBuffer;
-
-                for(i=0; i< lenPlcRxBuffer; i++)
-                {
-                    printf("%02x ", PLC_RX_BUFFER[i]);
-                    pMail->data[i] = PLC_RX_BUFFER[i];
-                }
-                printf("\n");
-
-                if( currentClientId == HMI_ID){
-                    osMailPut(hmiMail, pMail);
-                    printf("send it to Hmi\n");
-                }
-                else if( currentClientId == UDP_ID){
-                    //osMailPut(udpMail, pMail);
-                    printf("send it to Udp\n");
-                }
-
-                bPlcInSession = False;
-                printf("Plc out of session\n");
-
-            }
-        }
-
-        signalPlcRx = False;
     }
+    printf("\n<-- Plc RX Uart from Real_Plc:%d:\n", lenPlcRxBuffer);
+
+    if(bPlcInSession == False)
+    {
+        // Won't process it
+        printf("%d bytes got from PLC, no client\n", lenPlcRxBuffer);
+        return;
+    }
+
+    if(currentClientId == HMI_ID)
+    {
+        pMail = (NetMail_t*)osMailAlloc(hmiMail, 100);
+
+        if(pMail != NULL)
+        {
+            pMail->clientId = PLC_ID;
+            pMail->serverId = currentClientId;
+            pMail->length = lenPlcRxBuffer;
+
+            for(i=0; i< lenPlcRxBuffer; i++)
+            {
+                printf("%02x ", PLC_RX_BUFFER[i]);
+                pMail->data[i] = PLC_RX_BUFFER[i];
+            }
+            printf("\n");
+
+            osMailPut(hmiMail, pMail);
+            printf("send it to Hmi\n");
+
+        }
+    }
+    else if(currentClientId == UDP_ID)
+    {
+        pMail = (NetMail_t*)osMailAlloc(udpMail, 100);
+
+        if(pMail != NULL)
+        {
+            pMail->clientId = PLC_ID;
+            pMail->serverId = currentClientId;
+            pMail->length = lenPlcRxBuffer;
+
+            for(i=0; i< lenPlcRxBuffer; i++)
+            {
+                printf("%02x ", PLC_RX_BUFFER[i]);
+                pMail->data[i] = PLC_RX_BUFFER[i];
+            }
+            printf("\n");
+
+            osMailPut(udpMail, pMail);
+            printf("send it to Udp\n");
+
+        }
+    }
+    else
+    {
+        printf("Unrecognized client id: %d", currentClientId);
+    }
+
+    bPlcInSession = False;
+    StopTimer();
+
+    printf("Plc out of session\n");
+
+    signalPlcRx = False;
 
 }
 void StartPlcTask(void const * argument)
@@ -356,9 +407,23 @@ void Plc_Task_Init()
 
     if(plcTaskHandle == NULL)
     {
+
         printf("plc task create fail\n");
     }
     //printf("Plc task started\n");
+
+    osTimerDef(timeoutTimer, TimerHandler);
+    timerTimeout= osTimerCreate(osTimer(timeoutTimer), osTimerOnce, NULL);
+
+    if(timerTimeout == NULL)
+    {
+        printf("plc timerTimeout fail\n");
+    }
+    else
+    {
+        printf("plc timerTimeout created\n");
+    }
+
 }
 
 

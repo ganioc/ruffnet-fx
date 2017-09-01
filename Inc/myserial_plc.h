@@ -19,7 +19,7 @@
 #define PLC_RX_BUFFER_LEN    128
 #define PLC_QUEUE_LEN            128
 
-#define PLC_MESSAGE_TIMEOUT   500
+#define PLC_MESSAGE_TIMEOUT   200
 
 void Serial_Plc_Init();
 void Serial_Plc_MspInit();

@@ -340,6 +340,7 @@ osEvent osWait (uint32_t millisec);
 osTimerId osTimerCreate (const osTimerDef_t *timer_def, os_timer_type type, void *argument)
 {
 #if (configUSE_TIMERS == 1)
+    
   return xTimerCreate((const char *)"",
                       1, // period should be filled when starting the Timer using osTimerStart
                       (type == osTimerPeriodic) ? pdTRUE : pdFALSE,
