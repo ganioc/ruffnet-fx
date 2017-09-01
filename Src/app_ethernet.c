@@ -35,6 +35,7 @@
 
 #include "myled.h"
 #include "lwip.h"
+#include "mye2prom.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -65,7 +66,7 @@ void User_notification(struct netif *netif)
 
         sprintf((char*)iptxt, "%d.%d.%d.%d", IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
 
-        printf("Static IP address: %s\n", iptxt);
+        printf("User_notification Static IP address: %s\n", iptxt);
 
         /* Turn On LED 3 to indicate ETH and LwIP init success*/
         LED3_On();
@@ -161,6 +162,7 @@ void dhcp_do(struct netif *netif)
     struct ip_addr netmask;
     struct ip_addr gw;
     uint32_t IPaddress;
+    IpInfo_t * pIp = getIpInfoP();
 
     switch(DHCP_state)
     {
@@ -217,7 +219,10 @@ void dhcp_do(struct netif *netif)
                     dhcp_stop(netif);
 
                     /* Static address used */
-                    IP4_ADDR(&ipaddr, IP_ADDR0,IP_ADDR1, IP_ADDR2, IP_ADDR3);
+                    //IP4_ADDR(&ipaddr, IP_ADDR0,IP_ADDR1, IP_ADDR2, IP_ADDR3);
+                    //IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
+                    //IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+                    IP4_ADDR(&ipaddr, pIp->ip[0],pIp->ip[1], pIp->ip[2], pIp->ip[3]);
                     IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1, NETMASK_ADDR2, NETMASK_ADDR3);
                     IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
                     netif_set_addr(netif, &ipaddr, &netmask, &gw);
@@ -225,7 +230,7 @@ void dhcp_do(struct netif *netif)
 #ifdef USE_LCD
                     uint8_t iptxt[20];
 
-                    sprintf((char*)iptxt, "%d.%d.%d.%d", IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
+                    sprintf((char*)iptxt, "%d.%d.%d.%d", pIp->ip[0],pIp->ip[1], pIp->ip[2], pIp->ip[3]);
                     printf("DHCP timeout !!\n");
                     printf("Static IP address  : %s\n", iptxt);
 
